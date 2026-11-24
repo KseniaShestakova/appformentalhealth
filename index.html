@@ -1,0 +1,3251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Уютный День — Твой помощник до выходных</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/manrope@latest/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/plus-jakarta-sans@latest/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/index.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #0A0914;
+  --bg-soft: #14121F;
+  --surface: #1C1A2B;
+  --surface-2: #252338;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --text: #FFFFFE;
+  --text-soft: #A7A9BE;
+  --text-muted: #6B6D82;
+  --accent: #FF8906;
+  --accent-2: #E53170;
+  --accent-3: #2CB67D;
+  --accent-4: #7F5AF0;
+  --accent-5: #3DA9FC;
+  --gradient-1: linear-gradient(135deg, #FF8906 0%, #E53170 100%);
+  --gradient-2: linear-gradient(135deg, #7F5AF0 0%, #2CB67D 100%);
+  --gradient-3: linear-gradient(135deg, #3DA9FC 0%, #7F5AF0 100%);
+  --gradient-4: linear-gradient(135deg, #E53170 0%, #7F5AF0 100%);
+  --gradient-5: linear-gradient(135deg, #FF8906 0%, #7F5AF0 50%, #3DA9FC 100%);
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 40px rgba(127, 90, 240, 0.15);
+}
+html, body {
+  font-family: 'Manrope', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+.bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.bg-orbs::before, .bg-orbs::after {
+  content: ''; position: absolute; border-radius: 50%; filter: blur(100px);
+  animation: floatOrb 20s ease-in-out infinite;
+}
+.bg-orbs::before { width: 600px; height: 600px; background: radial-gradient(circle, rgba(127, 90, 240, 0.25) 0%, transparent 70%); top: -200px; right: -100px; }
+.bg-orbs::after { width: 500px; height: 500px; background: radial-gradient(circle, rgba(229, 49, 112, 0.2) 0%, transparent 70%); bottom: -150px; left: -100px; animation-delay: -10s; }
+@keyframes floatOrb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(80px, -60px) scale(1.1); }
+  66% { transform: translate(-60px, 80px) scale(0.95); }
+}
+.bg-grid {
+  position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none; z-index: 0;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+.app { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+.sidebar {
+  width: 260px;
+  background: rgba(20, 18, 31, 0.7);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border);
+  padding: 28px 16px;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar-logo {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 22px; font-weight: 800;
+  background: var(--gradient-5); background-size: 200% 200%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 6px; letter-spacing: -0.5px;
+  animation: gradientShift 6s ease infinite;
+}
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.sidebar-subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 28px; padding-left: 2px; }
+.nav-section-title { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin: 20px 14px 8px; }
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: 10px; cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 2px; font-size: 14px; font-weight: 500;
+  color: var(--text-soft); position: relative; overflow: hidden;
+}
+.nav-item:hover { color: var(--text); transform: translateX(4px); }
+.nav-item.active { color: var(--text); background: rgba(127, 90, 240, 0.15); box-shadow: 0 0 20px rgba(127, 90, 240, 0.2); }
+.nav-item.active::before {
+  content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 20px; background: var(--gradient-4); border-radius: 0 3px 3px 0;
+}
+.nav-icon { font-size: 18px; width: 24px; text-align: center; transition: transform 0.3s; }
+.nav-item:hover .nav-icon { transform: scale(1.2) rotate(-5deg); }
+
+.main { margin-left: 260px; flex: 1; padding: 32px 40px; max-width: calc(100vw - 260px); min-height: 100vh; }
+.page { display: none; animation: pageEnter 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+.page.active { display: block; }
+@keyframes pageEnter { from { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(4px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+
+.page-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; }
+.page-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 6px;
+  background: var(--gradient-5); background-size: 200% 200%;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: gradientShift 8s ease infinite;
+}
+.page-subtitle { color: var(--text-soft); font-size: 15px; }
+
+.card {
+  background: rgba(28, 26, 43, 0.6); backdrop-filter: blur(10px);
+  border: 1px solid var(--border); border-radius: 20px; padding: 24px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(127, 90, 240, 0.3), transparent);
+  opacity: 0; transition: opacity 0.4s;
+}
+.card:hover { border-color: var(--border-strong); transform: translateY(-4px); box-shadow: var(--shadow-glow); }
+.card:hover::before { opacity: 1; }
+.card-title { font-size: 15px; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; color: var(--text); }
+.card-title-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+.btn {
+  padding: 10px 18px; border-radius: 10px; border: none; cursor: pointer;
+  font-family: 'Manrope', sans-serif; font-weight: 600; font-size: 13px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  position: relative; overflow: hidden;
+}
+.btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.2); transform: translateX(-100%); transition: transform 0.4s; }
+.btn:hover::after { transform: translateX(0); }
+.btn-primary { background: var(--gradient-4); color: white; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(127, 90, 240, 0.4); }
+.btn-accent { background: var(--gradient-1); color: white; }
+.btn-accent:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255, 137, 6, 0.4); }
+.btn-success { background: var(--gradient-2); color: white; }
+.btn-info { background: var(--gradient-3); color: white; }
+.btn-ghost { background: rgba(255, 255, 255, 0.04); color: var(--text-soft); border: 1px solid var(--border); }
+.btn-ghost:hover { background: rgba(255, 255, 255, 0.08); color: var(--text); transform: translateY(-2px); }
+.btn-sm { padding: 7px 12px; font-size: 12px; }
+
+input, textarea, select {
+  font-family: 'Manrope', sans-serif; font-size: 14px;
+  padding: 11px 14px; border: 1.5px solid var(--border-strong); border-radius: 10px;
+  background: rgba(10, 9, 20, 0.6); color: var(--text); width: 100%; transition: all 0.3s;
+}
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent-4); background: var(--surface); box-shadow: 0 0 0 3px rgba(127, 90, 240, 0.15); }
+textarea { resize: vertical; min-height: 80px; }
+label { font-size: 12px; font-weight: 600; color: var(--text-soft); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.welcome-banner {
+  background: linear-gradient(135deg, rgba(127, 90, 240, 0.15) 0%, rgba(229, 49, 112, 0.1) 50%, rgba(255, 137, 6, 0.08) 100%);
+  border: 1px solid rgba(127, 90, 240, 0.2); border-radius: 24px; padding: 32px;
+  margin-bottom: 20px; position: relative; overflow: hidden;
+}
+.welcome-banner::before {
+  content: ''; position: absolute; top: -50%; right: -10%;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(255, 137, 6, 0.2) 0%, transparent 60%);
+  animation: floatOrb 15s ease-in-out infinite; pointer-events: none;
+}
+.welcome-banner h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; position: relative; }
+.welcome-banner p { color: var(--text-soft); font-size: 15px; position: relative; max-width: 500px; }
+.welcome-date { font-size: 13px; color: var(--text-muted); margin-top: 14px; font-weight: 600; position: relative; }
+.week-progress { margin-top: 22px; background: rgba(0, 0, 0, 0.25); border-radius: 12px; padding: 16px 18px; position: relative; border: 1px solid var(--border); }
+.week-progress-bar { height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden; margin-top: 10px; position: relative; }
+.week-progress-fill {
+  height: 100%; background: var(--gradient-5); background-size: 200% 200%;
+  border-radius: 4px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: gradientShift 3s ease infinite; position: relative;
+}
+.week-progress-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+.countdown-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 700px) { .countdown-row { grid-template-columns: 1fr; } }
+
+.countdown-box {
+  display: flex; align-items: center; gap: 14px;
+  border-radius: 16px; padding: 16px 20px;
+  position: relative; overflow: hidden;
+}
+.countdown-weekend {
+  background: linear-gradient(135deg, rgba(255, 137, 6, 0.15) 0%, rgba(229, 49, 112, 0.1) 100%);
+  border: 1px solid rgba(255, 137, 6, 0.25);
+}
+.countdown-vacation {
+  background: linear-gradient(135deg, rgba(127, 90, 240, 0.15) 0%, rgba(61, 169, 252, 0.1) 100%);
+  border: 1px solid rgba(127, 90, 240, 0.25);
+}
+.countdown-box::before {
+  content: ''; position: absolute; top: -50%; right: -10%;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(255, 137, 6, 0.2) 0%, transparent 60%);
+  animation: floatOrb 10s ease-in-out infinite; pointer-events: none;
+}
+.countdown-vacation::before { background: radial-gradient(circle, rgba(127, 90, 240, 0.2) 0%, transparent 60%); }
+.countdown-number {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 48px; font-weight: 800;
+  background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1; letter-spacing: -2px;
+}
+.countdown-vacation .countdown-number {
+  background: var(--gradient-3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.countdown-label { font-size: 13px; color: var(--text-soft); line-height: 1.4; position: relative; }
+.countdown-label strong { color: var(--text); display: block; font-size: 14px; }
+
+.stat-card {
+  background: rgba(28, 26, 43, 0.6); backdrop-filter: blur(10px);
+  border: 1px solid var(--border); border-radius: 16px; padding: 18px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative; overflow: hidden;
+}
+.stat-card:hover { border-color: var(--border-strong); transform: translateY(-4px); box-shadow: var(--shadow-glow); }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gradient-1); opacity: 0; transition: opacity 0.3s; }
+.stat-card:hover::before { opacity: 1; }
+.stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px; transition: transform 0.3s; }
+.stat-card:hover .stat-icon { transform: scale(1.15) rotate(-5deg); }
+.stat-value { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+.stat-label { font-size: 12px; color: var(--text-soft); margin-top: 4px; font-weight: 500; }
+
+.mini-weather, .mini-traffic { border-radius: 16px; padding: 18px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+.mini-weather { background: linear-gradient(135deg, rgba(61, 169, 252, 0.15) 0%, rgba(127, 90, 240, 0.1) 100%); border: 1px solid rgba(61, 169, 252, 0.2); }
+.mini-traffic { background: linear-gradient(135deg, rgba(255, 137, 6, 0.15) 0%, rgba(229, 49, 112, 0.1) 100%); border: 1px solid rgba(255, 137, 6, 0.2); }
+.mini-weather:hover, .mini-traffic:hover { transform: translateY(-4px); }
+.mini-weather:hover { box-shadow: 0 12px 32px rgba(61, 169, 252, 0.2); }
+.mini-traffic:hover { box-shadow: 0 12px 32px rgba(255, 137, 6, 0.2); }
+.mini-weather-icon { font-size: 40px; transition: transform 0.4s; }
+.mini-weather:hover .mini-weather-icon { transform: scale(1.2) rotate(10deg); }
+.mini-weather-temp { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+.mini-weather-desc { font-size: 12px; color: var(--text-soft); }
+.mini-weather-city { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.mini-traffic-level { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 32px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+.mini-traffic-label { font-size: 12px; color: var(--text-soft); }
+.mini-traffic-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.home-widgets-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.home-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.home-bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { 
+  .home-widgets-row, .home-bottom-row { grid-template-columns: 1fr; }
+  .home-stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+.planner-tabs { display: inline-flex; gap: 4px; margin-bottom: 20px; background: rgba(28, 26, 43, 0.6); padding: 6px; border-radius: 12px; border: 1px solid var(--border); }
+.planner-tab { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; color: var(--text-soft); }
+.planner-tab:hover { color: var(--text); }
+.planner-tab.active { background: var(--gradient-4); color: white; box-shadow: 0 4px 12px rgba(127, 90, 240, 0.3); }
+
+.task-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(10, 9, 20, 0.4); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; transition: all 0.3s; animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+.task-item:hover { border-color: var(--border-strong); background: var(--surface-2); transform: translateX(4px); }
+.task-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border-strong); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s; font-size: 12px; color: transparent; }
+.task-check:hover { border-color: var(--accent-4); transform: scale(1.1); }
+.task-check.done { background: var(--gradient-2); border-color: transparent; color: white; animation: checkPop 0.4s; }
+@keyframes checkPop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+.task-content { flex: 1; min-width: 0; }
+.task-title { font-size: 14px; font-weight: 600; }
+.task-title.done { text-decoration: line-through; color: var(--text-muted); }
+.task-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.task-delete { cursor: pointer; opacity: 0.4; transition: all 0.2s; font-size: 14px; padding: 4px; }
+.task-delete:hover { opacity: 1; color: var(--accent-2); transform: scale(1.2); }
+.task-tag { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.tag-uni { background: rgba(127, 90, 240, 0.2); color: #B79BFF; }
+.tag-homework { background: rgba(255, 137, 6, 0.2); color: #FFB066; }
+.tag-project { background: rgba(44, 182, 125, 0.2); color: #5EDBA3; }
+.tag-appointment { background: rgba(229, 49, 112, 0.2); color: #FF6B9D; }
+.tag-manicure { background: rgba(229, 49, 112, 0.2); color: #FF6B9D; }
+.tag-clinic { background: rgba(61, 169, 252, 0.2); color: #6BC0FF; }
+.tag-personal { background: rgba(255, 255, 255, 0.08); color: var(--text-soft); }
+
+.schedule-day { margin-bottom: 20px; }
+.schedule-day-header { font-weight: 700; font-size: 13px; color: var(--accent-4); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 1px; }
+.schedule-item { display: flex; gap: 14px; padding: 12px 14px; background: rgba(10, 9, 20, 0.4); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 6px; font-size: 13px; transition: all 0.3s; }
+.schedule-item:hover { border-color: var(--border-strong); transform: translateX(4px); }
+.schedule-time { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent-5); min-width: 100px; font-size: 12px; }
+
+.calendar { background: rgba(28, 26, 43, 0.6); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.calendar-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.calendar-nav { display: flex; gap: 8px; }
+.calendar-nav button { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-size: 16px; transition: all 0.2s; }
+.calendar-nav button:hover { background: var(--surface-2); border-color: var(--accent-4); }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.calendar-day-name { text-align: center; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; padding: 8px 0; }
+.calendar-day { aspect-ratio: 1; border-radius: 10px; background: rgba(10, 9, 20, 0.4); border: 1px solid var(--border); padding: 8px; cursor: pointer; transition: all 0.3s; position: relative; display: flex; flex-direction: column; min-height: 80px; }
+.calendar-day:hover { border-color: var(--accent-4); transform: scale(1.05); z-index: 2; }
+.calendar-day.other-month { opacity: 0.3; }
+.calendar-day.today { background: linear-gradient(135deg, rgba(127, 90, 240, 0.2) 0%, rgba(229, 49, 112, 0.1) 100%); border-color: var(--accent-4); box-shadow: 0 0 20px rgba(127, 90, 240, 0.3); }
+.calendar-day.weekend { background: rgba(255, 137, 6, 0.05); }
+.calendar-day.sunday { background: rgba(44, 182, 125, 0.08); border-color: rgba(44, 182, 125, 0.2); }
+.calendar-day.study-end { background: linear-gradient(135deg, rgba(255, 137, 6, 0.2) 0%, rgba(229, 49, 112, 0.15) 100%); border-color: var(--accent); }
+.calendar-day-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; }
+.calendar-day.today .calendar-day-num { color: var(--accent-4); }
+.calendar-day-markers { display: flex; flex-wrap: wrap; gap: 3px; margin-top: auto; }
+.calendar-marker { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.marker-task { background: var(--accent-4); }
+.marker-schedule { background: var(--accent-5); }
+.marker-appt { background: var(--accent-2); }
+.marker-habit { background: var(--accent-3); }
+.calendar-day-label { position: absolute; top: 4px; right: 6px; font-size: 10px; font-weight: 700; }
+
+.reader-timer { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 56px; font-weight: 800; background: var(--gradient-3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-align: center; padding: 20px; letter-spacing: -2px; }
+.reader-text { min-height: 300px; max-height: 500px; overflow-y: auto; padding: 24px; background: rgba(10, 9, 20, 0.6); border-radius: 14px; font-size: 16px; line-height: 1.8; border: 1px solid var(--border); color: var(--text); }
+.reader-text::selection { background: var(--accent); color: white; }
+.reader-text mark { background: linear-gradient(120deg, rgba(255, 137, 6, 0.3) 0%, rgba(229, 49, 112, 0.3) 100%); padding: 2px 4px; border-radius: 4px; color: var(--text); }
+.reader-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+.reader-stat { text-align: center; padding: 14px; background: rgba(10, 9, 20, 0.4); border-radius: 10px; border: 1px solid var(--border); }
+.reader-stat-val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.reader-stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.book-card { background: rgba(28, 26, 43, 0.6); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 12px; transition: all 0.3s; }
+.book-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.book-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; }
+.book-title { font-weight: 700; font-size: 15px; }
+.book-author { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.book-progress-bar { height: 8px; background: rgba(255, 255, 255, 0.06); border-radius: 4px; overflow: hidden; margin: 10px 0; }
+.book-progress-fill { height: 100%; background: var(--gradient-2); border-radius: 4px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+.book-progress-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: shimmer 2s infinite; }
+.book-stats { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-soft); }
+.book-controls { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+
+.mood-picker { display: flex; gap: 10px; justify-content: center; margin: 20px 0; flex-wrap: wrap; }
+.mood-btn { width: 64px; height: 64px; border-radius: 16px; border: 2px solid var(--border); cursor: pointer; font-size: 28px; background: rgba(10, 9, 20, 0.4); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; }
+.mood-btn:hover { transform: scale(1.15) rotate(-5deg); border-color: var(--border-strong); }
+.mood-btn.selected { border-color: var(--accent-4); background: rgba(127, 90, 240, 0.15); box-shadow: 0 0 24px rgba(127, 90, 240, 0.4); animation: moodPulse 1.5s infinite; }
+@keyframes moodPulse { 0%, 100% { box-shadow: 0 0 24px rgba(127, 90, 240, 0.4); } 50% { box-shadow: 0 0 32px rgba(127, 90, 240, 0.6); } }
+.mood-history { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 16px; }
+.mood-day { aspect-ratio: 1; border-radius: 10px; background: rgba(10, 9, 20, 0.4); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; position: relative; transition: all 0.3s; }
+.mood-day:hover { transform: scale(1.1); border-color: var(--accent-4); }
+.mood-day-label { position: absolute; bottom: 2px; font-size: 9px; color: var(--text-muted); font-weight: 600; }
+
+.habit-item { background: rgba(28, 26, 43, 0.6); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 12px; transition: all 0.3s; }
+.habit-item:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.habit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.habit-name { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 10px; }
+.habit-streak { font-size: 12px; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 800; }
+.habit-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.habit-day { aspect-ratio: 1; border-radius: 8px; background: rgba(10, 9, 20, 0.4); border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-muted); font-weight: 600; transition: all 0.3s; }
+.habit-day.done { background: var(--gradient-2); color: white; border-color: transparent; font-weight: 700; animation: checkPop 0.4s; }
+.habit-day:hover { transform: scale(1.1); border-color: var(--border-strong); }
+
+.weight-chart { height: 200px; background: rgba(10, 9, 20, 0.4); border-radius: 14px; padding: 16px; position: relative; margin: 16px 0; border: 1px solid var(--border); }
+.weight-input-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+
+.weight-goal-card {
+  background: linear-gradient(135deg, rgba(44, 182, 125, 0.15) 0%, rgba(61, 169, 252, 0.1) 100%);
+  border: 1px solid rgba(44, 182, 125, 0.25);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.weight-goal-card::before {
+  content: ''; position: absolute; top: -50%; right: -10%;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(44, 182, 125, 0.2) 0%, transparent 60%);
+  animation: floatOrb 10s ease-in-out infinite; pointer-events: none;
+}
+.weight-goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; position: relative; }
+.weight-goal-title { font-size: 13px; font-weight: 700; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1px; }
+.weight-goal-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; position: relative; }
+.weight-goal-stat { text-align: center; padding: 10px; background: rgba(10, 9, 20, 0.3); border-radius: 10px; }
+.weight-goal-stat-val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; }
+.weight-goal-stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.weight-goal-progress-bar { height: 10px; background: rgba(255, 255, 255, 0.08); border-radius: 5px; overflow: hidden; margin-top: 10px; position: relative; }
+.weight-goal-progress-fill { height: 100%; background: var(--gradient-2); border-radius: 5px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+.weight-goal-progress-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: shimmer 2s infinite; }
+
+.note-card { background: rgba(28, 26, 43, 0.6); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 12px; position: relative; transition: all 0.3s; overflow: hidden; }
+.note-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.note-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gradient-1); opacity: 0.6; }
+.note-card:nth-child(2n)::before { background: var(--gradient-2); }
+.note-card:nth-child(3n)::before { background: var(--gradient-3); }
+.note-card:nth-child(4n)::before { background: var(--gradient-4); }
+.note-date { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.note-text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: var(--text); }
+.note-delete { position: absolute; top: 14px; right: 14px; cursor: pointer; opacity: 0.4; font-size: 14px; transition: all 0.2s; }
+.note-delete:hover { opacity: 1; color: var(--accent-2); transform: scale(1.2); }
+
+.scrapbook-toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+.scrapbook-canvas { width: 100%; height: 500px; background: var(--bg-soft); border-radius: 16px; position: relative; overflow: hidden; border: 1px solid var(--border); background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0); background-size: 24px 24px; }
+.scrap-item { position: absolute; cursor: move; user-select: none; padding: 8px 14px; border-radius: 8px; font-size: 14px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); transition: box-shadow 0.2s; }
+.scrap-item:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); }
+.scrap-item.selected { outline: 2px dashed var(--accent-4); outline-offset: 4px; }
+.scrap-sticker { font-size: 40px; background: transparent; box-shadow: none; }
+.scrap-photo { width: 120px; height: 120px; border-radius: 8px; object-fit: cover; }
+
+.weather-widget { background: linear-gradient(135deg, rgba(61, 169, 252, 0.2) 0%, rgba(127, 90, 240, 0.15) 100%); border: 1px solid rgba(61, 169, 252, 0.3); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; }
+.weather-widget::before { content: ''; position: absolute; top: -50%; right: -20%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(61, 169, 252, 0.3) 0%, transparent 60%); animation: floatOrb 15s ease-in-out infinite; pointer-events: none; }
+.weather-temp { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 64px; font-weight: 800; letter-spacing: -2px; position: relative; }
+.weather-desc { font-size: 15px; color: var(--text-soft); margin-top: 4px; position: relative; }
+.weather-icon { font-size: 64px; margin: 10px 0; position: relative; animation: weatherBob 4s ease-in-out infinite; }
+@keyframes weatherBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+.traffic-widget { background: linear-gradient(135deg, rgba(255, 137, 6, 0.2) 0%, rgba(229, 49, 112, 0.15) 100%); border: 1px solid rgba(255, 137, 6, 0.3); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; }
+.traffic-widget::before { content: ''; position: absolute; top: -50%; right: -20%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(255, 137, 6, 0.3) 0%, transparent 60%); animation: floatOrb 15s ease-in-out infinite; pointer-events: none; }
+.traffic-level { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 56px; font-weight: 800; letter-spacing: -1px; position: relative; }
+
+.hourly-forecast { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; scrollbar-width: thin; }
+.hour-item { flex-shrink: 0; min-width: 80px; padding: 14px 10px; background: rgba(10, 9, 20, 0.4); border: 1px solid var(--border); border-radius: 12px; text-align: center; transition: all 0.3s; }
+.hour-item:hover { border-color: var(--accent-5); transform: translateY(-4px); }
+.hour-item.now { background: linear-gradient(135deg, rgba(61, 169, 252, 0.2) 0%, rgba(127, 90, 240, 0.15) 100%); border-color: var(--accent-5); }
+.hour-time { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+.hour-icon { font-size: 24px; margin: 6px 0; }
+.hour-temp { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px; }
+
+.news-item { padding: 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.3s; border-radius: 8px; display: flex; gap: 14px; align-items: flex-start; }
+.news-item:hover { background: rgba(255, 255, 255, 0.03); transform: translateX(4px); }
+.news-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--gradient-3); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.news-content { flex: 1; min-width: 0; }
+.news-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.news-meta { font-size: 12px; color: var(--text-muted); }
+.news-refresh { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); padding: 6px 12px; background: rgba(10, 9, 20, 0.4); border-radius: 20px; border: 1px solid var(--border); }
+.news-refresh-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-3); animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
+
+.joke-card {
+  background: linear-gradient(135deg, rgba(255, 137, 6, 0.1) 0%, rgba(229, 49, 112, 0.1) 50%, rgba(127, 90, 240, 0.1) 100%);
+  border: 1px solid rgba(255, 137, 6, 0.2);
+  border-radius: 24px; padding: 40px; text-align: center; min-height: 200px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; overflow: hidden; transition: all 0.5s;
+}
+.joke-card:hover { transform: scale(1.01); }
+.joke-text { font-size: 18px; line-height: 1.6; font-weight: 600; white-space: pre-line; position: relative; }
+.joke-emoji { font-size: 56px; margin-bottom: 16px; position: relative; animation: jokeWiggle 3s ease-in-out infinite; }
+@keyframes jokeWiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
+.joke-of-day-badge {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--gradient-1); color: white;
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.analytics-card { background: rgba(28, 26, 43, 0.6); border: 1px solid var(--border); border-radius: 20px; padding: 24px; position: relative; overflow: hidden; }
+.analytics-card.wide { grid-column: span 2; }
+@media (max-width: 900px) { .analytics-card.wide { grid-column: span 1; } }
+.analytics-card-title { font-size: 13px; font-weight: 700; color: var(--text-soft); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.analytics-big-number { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 48px; font-weight: 800; letter-spacing: -1.5px; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+.analytics-big-label { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+.analytics-chart { height: 200px; margin-top: 10px; position: relative; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(10, 9, 20, 0.85); backdrop-filter: blur(12px); z-index: 1000; display: none; align-items: center; justify-content: center; animation: fadeIn 0.3s; }
+.modal-overlay.show { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border-strong); border-radius: 20px; padding: 28px; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: modalEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes modalEnter { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.5px; }
+.form-group { margin-bottom: 14px; }
+.form-row { display: flex; gap: 10px; }
+.form-row > * { flex: 1; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+
+.mobile-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 200; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; cursor: pointer; font-size: 18px; color: var(--text); }
+@media (max-width: 900px) {
+  .mobile-toggle { display: block; }
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; padding: 20px; padding-top: 70px; max-width: 100vw; }
+  .page-title { font-size: 28px; }
+  .welcome-banner h1 { font-size: 24px; }
+}
+
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+
+.quote-item { background: rgba(10, 9, 20, 0.4); border-left: 3px solid var(--accent); padding: 12px 16px; margin-bottom: 8px; border-radius: 0 10px 10px 0; font-size: 13px; font-style: italic; color: var(--text-soft); }
+
+.pill { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; background: rgba(255, 255, 255, 0.06); color: var(--text-soft); }
+.pill-accent { background: rgba(255, 137, 6, 0.15); color: var(--accent); }
+.pill-success { background: rgba(44, 182, 125, 0.15); color: var(--accent-3); }
+.pill-purple { background: rgba(127, 90, 240, 0.15); color: var(--accent-4); }
+
+.weight-history { max-height: 280px; overflow-y: auto; }
+.weight-entry { display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+.toast { position: fixed; bottom: 30px; right: 30px; background: var(--gradient-4); color: white; padding: 14px 22px; border-radius: 12px; box-shadow: 0 8px 24px rgba(127, 90, 240, 0.4); z-index: 2000; font-size: 14px; font-weight: 600; animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.day-detail-item { padding: 10px 12px; background: rgba(10, 9, 20, 0.4); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 6px; font-size: 13px; }
+.day-detail-item-title { font-weight: 600; margin-bottom: 2px; }
+.day-detail-item-meta { font-size: 11px; color: var(--text-muted); }
+
+.pinterest-search-row { display: flex; gap: 8px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<div class="bg-orbs"></div>
+<div class="bg-grid"></div>
+
+<div class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Уютный День</div>
+    <div class="sidebar-subtitle">Твой помощник до выходных</div>
+    
+    <div class="nav-section-title">Главное</div>
+    <div class="nav-item active" data-page="home"><span class="nav-icon">🏠</span>Главная</div>
+    <div class="nav-item" data-page="calendar"><span class="nav-icon">📆</span>Календарь</div>
+    <div class="nav-item" data-page="analytics"><span class="nav-icon">📊</span>Аналитика</div>
+    <div class="nav-item" data-page="planner"><span class="nav-icon">📅</span>Планировщик</div>
+    
+    <div class="nav-section-title">Саморазвитие</div>
+    <div class="nav-item" data-page="reader"><span class="nav-icon">📖</span>Читалка</div>
+    <div class="nav-item" data-page="books"><span class="nav-icon">📚</span>Мои книги</div>
+    <div class="nav-item" data-page="mood"><span class="nav-icon">💫</span>Настроение</div>
+    <div class="nav-item" data-page="habits"><span class="nav-icon">✨</span>Привычки</div>
+    <div class="nav-item" data-page="weight"><span class="nav-icon">⚖️</span>Вес</div>
+    
+    <div class="nav-section-title">Творчество</div>
+    <div class="nav-item" data-page="notes"><span class="nav-icon">📝</span>Заметки</div>
+    <div class="nav-item" data-page="scrapbook"><span class="nav-icon">🎨</span>Скрапбукинг</div>
+    
+    <div class="nav-section-title">Информация</div>
+    <div class="nav-item" data-page="weather"><span class="nav-icon">🌤️</span>Погода и пробки</div>
+    <div class="nav-item" data-page="news"><span class="nav-icon">📰</span>Новости</div>
+    <div class="nav-item" data-page="jokes"><span class="nav-icon">😄</span>Шутка дня</div>
+  </aside>
+
+  <main class="main">
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="welcome-banner">
+        <h1 id="welcome-text">Доброе утро! ✨</h1>
+        <p>Даже в питерской ноябрьской хандре есть уют — чашка чая, тёплый свитер и маленькие победы</p>
+        <div class="welcome-date" id="current-date"></div>
+        <div class="week-progress">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;font-weight:700">Прогресс недели до воскресенья</span>
+            <span class="pill pill-purple" id="week-progress-text">0%</span>
+          </div>
+          <div class="week-progress-bar"><div class="week-progress-fill" id="week-fill"></div></div>
+        </div>
+      </div>
+
+      <div class="countdown-row">
+        <div class="countdown-box countdown-weekend">
+          <div class="countdown-number" id="countdown-weekend">—</div>
+          <div class="countdown-label">
+            <strong id="countdown-weekend-title">До выходного</strong>
+            <span id="countdown-weekend-sub">ближайшее воскресенье</span>
+          </div>
+        </div>
+        <div class="countdown-box countdown-vacation">
+          <div class="countdown-number" id="countdown-vacation">—</div>
+          <div class="countdown-label">
+            <strong>До конца учёбы</strong>
+            <span>6 дней в неделю · до 24 декабря</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-widgets-row">
+        <div class="mini-weather" onclick="navigateTo('weather')">
+          <div class="mini-weather-icon" id="home-weather-icon">🌤️</div>
+          <div style="flex:1">
+            <div class="mini-weather-temp" id="home-weather-temp">+2°</div>
+            <div class="mini-weather-desc" id="home-weather-desc">Облачно</div>
+            <div class="mini-weather-city">📍 Санкт-Петербург</div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted)">💨 <span id="home-weather-wind">4 м/с</span></div>
+        </div>
+        <div class="mini-traffic" onclick="navigateTo('weather')">
+          <div>
+            <div class="mini-traffic-level" id="home-traffic-level">4</div>
+            <div class="mini-traffic-label">/ 10 баллов</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:14px">Пробки</div>
+            <div class="mini-traffic-desc" id="home-traffic-desc">Умеренные затруднения</div>
+            <div class="mini-traffic-desc">📍 Санкт-Петербург</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-stats-row">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(127,90,240,0.15)">✅</div>
+          <div class="stat-value" id="stat-tasks">0</div>
+          <div class="stat-label">Задач сегодня</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(229,49,112,0.15)">💫</div>
+          <div class="stat-value" id="stat-mood">—</div>
+          <div class="stat-label">Настроение</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(255,137,6,0.15)">📖</div>
+          <div class="stat-value" id="stat-reading">0</div>
+          <div class="stat-label">Минут чтения</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(44,182,125,0.15)">🔥</div>
+          <div class="stat-value" id="stat-streak">0</div>
+          <div class="stat-label">Привычек сегодня</div>
+        </div>
+      </div>
+
+      <div class="home-bottom-row">
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-icon" style="background:rgba(127,90,240,0.15)">📋</div>
+            Задачи на сегодня
+          </div>
+          <div id="home-tasks"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-icon" style="background:rgba(255,137,6,0.15)">💭</div>
+            Заметка дня
+          </div>
+          <textarea id="home-note" placeholder="Что у тебя на душе сегодня?"></textarea>
+          <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="saveHomeNote()">💾 Сохранить</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">
+          <div class="card-title-icon" style="background:rgba(44,182,125,0.15)">🎯</div>
+          Быстрые действия
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-accent" onclick="navigateTo('planner')">+ Новая задача</button>
+          <button class="btn btn-success" onclick="navigateTo('reader')">📖 Читать</button>
+          <button class="btn btn-primary" onclick="navigateTo('mood')">💫 Настроение</button>
+          <button class="btn btn-info" onclick="navigateTo('calendar')">📆 Календарь</button>
+          <button class="btn btn-ghost" onclick="navigateTo('jokes')">😄 Шутка дня</button>
+          <button class="btn btn-ghost" onclick="navigateTo('scrapbook')">🎨 Творить</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="page" id="page-calendar">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📆 Календарь</div>
+          <div class="page-subtitle">Вся твоя жизнь на одном экране</div>
+        </div>
+        <button class="btn btn-primary" onclick="goToToday()">📍 Сегодня</button>
+      </div>
+
+      <div class="calendar">
+        <div class="calendar-header">
+          <div class="calendar-title" id="calendar-title"></div>
+          <div class="calendar-nav">
+            <button onclick="changeMonth(-1)">‹</button>
+            <button onclick="changeMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="calendar-grid" id="calendar-grid"></div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">📌 Легенда</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px">
+          <div style="display:flex;align-items:center;gap:6px"><div class="calendar-marker marker-task"></div>Задачи</div>
+          <div style="display:flex;align-items:center;gap:6px"><div class="calendar-marker marker-schedule"></div>Расписание</div>
+          <div style="display:flex;align-items:center;gap:6px"><div class="calendar-marker marker-appt"></div>Записи</div>
+          <div style="display:flex;align-items:center;gap:6px"><div class="calendar-marker marker-habit"></div>Привычки</div>
+          <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(44,182,125,0.15);border:1px solid rgba(44,182,125,0.3)"></div>Воскресенье (выходной)</div>
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--text-muted)">💡 Кликай на день, чтобы увидеть детали</div>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="page" id="page-analytics">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📊 Аналитика</div>
+          <div class="page-subtitle">Твой прогресс в цифрах</div>
+        </div>
+        <button class="btn btn-ghost" onclick="exportAnalytics()">📤 Экспорт</button>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="analytics-card">
+          <div class="analytics-card-title">🔥 Общая серия</div>
+          <div class="analytics-big-number" id="an-total-streak">0</div>
+          <div class="analytics-big-label">дней подряд с активностью</div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-card-title">✅ Выполнено задач</div>
+          <div class="analytics-big-number" id="an-tasks-done" style="background:var(--gradient-2);-webkit-background-clip:text;background-clip:text">0</div>
+          <div class="analytics-big-label">за всё время</div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-card-title">📖 Время чтения</div>
+          <div class="analytics-big-number" id="an-reading-time" style="background:var(--gradient-3);-webkit-background-clip:text;background-clip:text">0</div>
+          <div class="analytics-big-label">минут всего</div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-card-title">💛 Цитат собрано</div>
+          <div class="analytics-big-number" id="an-quotes" style="background:var(--gradient-1);-webkit-background-clip:text;background-clip:text">0</div>
+          <div class="analytics-big-label">вдохновляющих строк</div>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="analytics-card wide">
+          <div class="analytics-card-title">📈 Активность за последние 30 дней</div>
+          <div class="analytics-chart"><canvas id="chart-activity"></canvas></div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-card-title">🎯 Категории задач</div>
+          <div class="analytics-chart"><canvas id="chart-categories"></canvas></div>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="analytics-card">
+          <div class="analytics-card-title">💫 Настроение за месяц</div>
+          <div class="analytics-chart"><canvas id="chart-mood"></canvas></div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-card-title">📚 Чтение по дням</div>
+          <div class="analytics-chart"><canvas id="chart-reading"></canvas></div>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="analytics-card">
+          <div class="analytics-card-title">⚖️ Динамика веса</div>
+          <div class="analytics-chart"><canvas id="chart-weight"></canvas></div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-card-title">📊 Сводка недели</div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px">
+            <div style="display:flex;justify-content:space-between;padding:12px;background:rgba(10,9,20,0.4);border-radius:10px"><span style="color:var(--text-soft)">Задач выполнено</span><strong id="week-tasks-done">0</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:12px;background:rgba(10,9,20,0.4);border-radius:10px"><span style="color:var(--text-soft)">Привычек закрыто</span><strong id="week-habits-done">0</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:12px;background:rgba(10,9,20,0.4);border-radius:10px"><span style="color:var(--text-soft)">Минут чтения</span><strong id="week-reading">0</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:12px;background:rgba(10,9,20,0.4);border-radius:10px"><span style="color:var(--text-soft)">Заметок написано</span><strong id="week-notes">0</strong></div>
+            <div style="display:flex;justify-content:space-between;padding:12px;background:rgba(10,9,20,0.4);border-radius:10px"><span style="color:var(--text-soft)">Среднее настроение</span><strong id="week-mood">—</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLANNER -->
+    <div class="page" id="page-planner">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📅 Планировщик</div>
+          <div class="page-subtitle">Расписание, задачи, записи</div>
+        </div>
+      </div>
+
+      <div class="planner-tabs">
+        <div class="planner-tab active" data-ptab="tasks">Задачи</div>
+        <div class="planner-tab" data-ptab="schedule">Расписание</div>
+        <div class="planner-tab" data-ptab="appointments">Записи</div>
+      </div>
+
+      <div id="ptab-tasks">
+        <div class="card">
+          <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-primary btn-sm" onclick="openTaskModal()">+ Новая задача</button>
+            <select id="task-filter" onchange="renderTasks()" style="max-width:200px">
+              <option value="all">Все задачи</option>
+              <option value="today">Сегодня</option>
+              <option value="week">Эта неделя</option>
+              <option value="uni">Университет</option>
+              <option value="homework">Домашнее задание</option>
+              <option value="project">Проекты</option>
+            </select>
+          </div>
+          <div id="tasks-list"></div>
+        </div>
+      </div>
+
+      <div id="ptab-schedule" style="display:none">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div class="card-title" style="margin:0">📚 Расписание занятий</div>
+            <button class="btn btn-primary btn-sm" onclick="openScheduleModal()">+ Добавить занятие</button>
+          </div>
+          <div id="schedule-list"></div>
+        </div>
+      </div>
+
+      <div id="ptab-appointments" style="display:none">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div class="card-title" style="margin:0">📌 Записи и встречи</div>
+            <button class="btn btn-primary btn-sm" onclick="openApptModal()">+ Новая запись</button>
+          </div>
+          <div id="appt-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- READER -->
+    <div class="page" id="page-reader">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📖 Читалка</div>
+          <div class="page-subtitle">Читай, выделяй цитаты, отслеживай прогресс</div>
+        </div>
+      </div>
+
+      <div class="home-bottom-row">
+        <div class="card">
+          <div class="card-title">⏱️ Таймер чтения</div>
+          <div class="reader-timer" id="reader-timer">00:00</div>
+          <div style="display:flex;gap:10px;justify-content:center">
+            <button class="btn btn-primary" id="reader-start-btn" onclick="toggleReaderTimer()">▶️ Начать</button>
+            <button class="btn btn-ghost" onclick="resetReaderTimer()">Сброс</button>
+          </div>
+          <div class="reader-stats">
+            <div class="reader-stat"><div class="reader-stat-val" id="reader-today-min">0</div><div class="reader-stat-lbl">Сегодня</div></div>
+            <div class="reader-stat"><div class="reader-stat-val" id="reader-total-min">0</div><div class="reader-stat-lbl">Всего</div></div>
+            <div class="reader-stat"><div class="reader-stat-val" id="reader-quotes-count">0</div><div class="reader-stat-lbl">Цитат</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📚 Загрузить файл</div>
+          <label>Поддерживаемые форматы:</label>
+          <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+            <span class="pill pill-purple">.txt</span>
+            <span class="pill pill-accent">.pdf</span>
+            <span class="pill pill-success">.fb2</span>
+          </div>
+          <input type="file" id="reader-file" accept=".txt,.pdf,.fb2">
+          <label style="margin-top:10px">Или вставь текст:</label>
+          <textarea id="reader-input" placeholder="Вставь текст сюда..." style="min-height:80px"></textarea>
+          <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="loadReaderText()">Загрузить</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">📖 Читалка <span class="pill" style="margin-left:8px">Выделяй текст для цитат</span></div>
+        <div class="reader-text" id="reader-text">
+          <p style="color:var(--text-muted);text-align:center;padding:40px">Загрузи файл, чтобы начать читать ✨</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">💛 Мои цитаты</div>
+        <div id="quotes-list"></div>
+      </div>
+    </div>
+
+    <!-- BOOKS -->
+    <div class="page" id="page-books">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📚 Мои книги</div>
+          <div class="page-subtitle">Отслеживай прогресс бумажных и электронных книг</div>
+        </div>
+        <button class="btn btn-primary" onclick="openBookModal()">+ Добавить книгу</button>
+      </div>
+
+      <div class="analytics-grid" style="margin-bottom:20px">
+        <div class="analytics-card">
+          <div class="analytics-card-title">📖 Всего книг</div>
+          <div class="analytics-big-number" id="books-total">0</div>
+          <div class="analytics-big-label">в твоей библиотеке</div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-card-title">✅ Прочитано</div>
+          <div class="analytics-big-number" id="books-done" style="background:var(--gradient-2);-webkit-background-clip:text;background-clip:text">0</div>
+          <div class="analytics-big-label">книг завершено</div>
+        </div>
+        <div class="analytics-card">
+          <div class="analytics-card-title">📑 Страниц прочитано</div>
+          <div class="analytics-big-number" id="books-pages" style="background:var(--gradient-3);-webkit-background-clip:text;background-clip:text">0</div>
+          <div class="analytics-big-label">всего страниц</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📚 Активные и завершённые</div>
+        <div id="books-list"></div>
+      </div>
+    </div>
+
+    <!-- MOOD -->
+    <div class="page" id="page-mood">
+      <div class="page-header">
+        <div>
+          <div class="page-title">💫 Эмоциональный фон</div>
+          <div class="page-subtitle">Отслеживай своё настроение</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Как ты себя чувствуешь сейчас?</div>
+        <div class="mood-picker" id="mood-picker">
+          <div class="mood-btn" data-mood="😄" title="Отлично">😄</div>
+          <div class="mood-btn" data-mood="😊" title="Хорошо">😊</div>
+          <div class="mood-btn" data-mood="😐" title="Нормально">😐</div>
+          <div class="mood-btn" data-mood="😔" title="Грустно">😔</div>
+          <div class="mood-btn" data-mood="😢" title="Плохо">😢</div>
+          <div class="mood-btn" data-mood="😤" title="Злюсь">😤</div>
+          <div class="mood-btn" data-mood="😴" title="Устал(а)">😴</div>
+          <div class="mood-btn" data-mood="🥰" title="Влюблён(а)">🥰</div>
+        </div>
+        <textarea id="mood-note" placeholder="Что повлияло на настроение? (необязательно)"></textarea>
+        <button class="btn btn-primary" style="margin-top:10px" onclick="saveMood()">💾 Сохранить</button>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">📊 Настроение за последние 28 дней</div>
+        <div class="mood-history" id="mood-history"></div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">💭 Дневник настроения</div>
+        <div id="mood-diary"></div>
+      </div>
+    </div>
+
+    <!-- HABITS -->
+    <div class="page" id="page-habits">
+      <div class="page-header">
+        <div>
+          <div class="page-title">✨ Привычки</div>
+          <div class="page-subtitle">Маленькие шаги каждый день</div>
+        </div>
+        <button class="btn btn-primary" onclick="openHabitModal()">+ Новая привычка</button>
+      </div>
+      <div class="card"><div id="habits-list"></div></div>
+    </div>
+
+    <!-- WEIGHT -->
+    <div class="page" id="page-weight">
+      <div class="page-header">
+        <div>
+          <div class="page-title">⚖️ Трекер веса</div>
+          <div class="page-subtitle">Отслеживай прогресс без стресса</div>
+        </div>
+      </div>
+
+      <div class="weight-goal-card">
+        <div class="weight-goal-header">
+          <div class="weight-goal-title">🎯 Моя цель</div>
+          <button class="btn btn-ghost btn-sm" onclick="openWeightGoalModal()">✏️ Изменить</button>
+        </div>
+        <div id="weight-goal-content"></div>
+      </div>
+
+      <div class="home-bottom-row">
+        <div class="card">
+          <div class="card-title">📊 Добавить измерение</div>
+          <div class="weight-input-row">
+            <div style="flex:1"><label>Вес (кг)</label><input type="number" step="0.1" id="weight-input" placeholder="65.5"></div>
+            <div style="flex:1"><label>Дата</label><input type="date" id="weight-date"></div>
+            <button class="btn btn-primary" onclick="addWeight()" style="height:42px;margin-top:auto">+</button>
+          </div>
+          <div class="weight-chart" id="weight-chart"></div>
+          <div style="display:flex;justify-content:space-around;text-align:center;margin-top:12px">
+            <div><div style="font-size:22px;font-weight:800;color:var(--accent)" id="weight-current">—</div><div style="font-size:11px;color:var(--text-muted)">Текущий</div></div>
+            <div><div style="font-size:22px;font-weight:800;color:var(--accent-3)" id="weight-start">—</div><div style="font-size:11px;color:var(--text-muted)">Начальный</div></div>
+            <div><div style="font-size:22px;font-weight:800;color:var(--accent-4)" id="weight-diff">—</div><div style="font-size:11px;color:var(--text-muted)">Изменение</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📜 История</div>
+          <div class="weight-history" id="weight-history"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="page" id="page-notes">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📝 Заметки</div>
+          <div class="page-subtitle">Лови мысли в течение дня</div>
+        </div>
+      </div>
+      <div class="card">
+        <textarea id="new-note" placeholder="О чём думаешь?" style="min-height:100px"></textarea>
+        <button class="btn btn-primary" style="margin-top:10px" onclick="addNote()">💾 Сохранить</button>
+      </div>
+      <div id="notes-list" style="margin-top:20px"></div>
+    </div>
+
+    <!-- SCRAPBOOK -->
+    <div class="page" id="page-scrapbook">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🎨 Скрапбукинг</div>
+          <div class="page-subtitle">Коллажи, мудборды и вдохновение</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="scrapbook-toolbar">
+          <button class="btn btn-primary btn-sm" onclick="addScrapText()">+ Текст</button>
+          <button class="btn btn-accent btn-sm" onclick="addScrapSticker()">+ Стикер</button>
+          <button class="btn btn-success btn-sm" onclick="document.getElementById('scrap-img-input').click()">+ Фото</button>
+          <input type="file" id="scrap-img-input" accept="image/*" style="display:none" onchange="addScrapImage(event)">
+          <button class="btn btn-info btn-sm" onclick="openPinterestModal()">📌 Pinterest</button>
+          <button class="btn btn-ghost btn-sm" onclick="addScrapShape()">+ Фигура</button>
+          <span style="margin:0 8px;color:var(--text-muted)">|</span>
+          <label style="margin:0;display:flex;align-items:center;gap:6px;font-size:12px">Цвет:
+            <input type="color" id="scrap-color" value="#7F5AF0" style="width:32px;height:32px;padding:2px;cursor:pointer">
+          </label>
+          <label style="margin:0;display:flex;align-items:center;gap:6px;font-size:12px">Фон:
+            <input type="color" id="scrap-bg" value="#1C1A2B" style="width:32px;height:32px;padding:2px;cursor:pointer" onchange="document.getElementById('scrap-canvas').style.background=this.value">
+          </label>
+          <span style="margin:0 8px;color:var(--text-muted)">|</span>
+          <button class="btn btn-ghost btn-sm" onclick="deleteSelectedScrap()">🗑️</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearScrapbook()">Очистить</button>
+          <button class="btn btn-ghost btn-sm" onclick="saveScrapbook()">💾 Сохранить</button>
+        </div>
+        <div class="scrapbook-canvas" id="scrap-canvas"></div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text-muted)">💡 Перетаскивай элементы, кликай для выбора</div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">🖼️ Сохранённые работы</div>
+        <div id="saved-scraps" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px"></div>
+      </div>
+    </div>
+
+    <!-- WEATHER -->
+    <div class="page" id="page-weather">
+      <div class="page-header">
+        <div>
+          <div class="page-title">🌤️ Погода и пробки</div>
+          <div class="page-subtitle">Санкт-Петербург — почасовой прогноз</div>
+        </div>
+      </div>
+
+      <div class="home-bottom-row">
+        <div class="weather-widget">
+          <div style="font-size:13px;color:var(--text-soft);font-weight:600" id="weather-city">📍 Санкт-Петербург</div>
+          <div class="weather-icon" id="weather-icon">🌤️</div>
+          <div class="weather-temp" id="weather-temp">+2°</div>
+          <div class="weather-desc" id="weather-desc">Облачно с прояснениями</div>
+          <div style="display:flex;justify-content:space-around;margin-top:20px;font-size:13px;position:relative">
+            <div>💨 <span id="weather-wind">4 м/с</span></div>
+            <div>💧 <span id="weather-hum">78%</span></div>
+            <div>🌡️ Ощущ. <span id="weather-feels">-1°</span></div>
+          </div>
+          <a href="https://yandex.ru/pogoda/saint-petersburg" target="_blank" style="display:inline-block;margin-top:20px;color:var(--accent-5);text-decoration:none;font-size:13px;font-weight:600;position:relative">Открыть Яндекс.Погоду →</a>
+        </div>
+
+        <div class="traffic-widget">
+          <div style="font-size:13px;color:var(--text-soft);font-weight:600;margin-bottom:10px;position:relative">🚗 Пробки в Санкт-Петербурге</div>
+          <div class="traffic-level" id="traffic-level">4</div>
+          <div style="font-size:14px;margin-top:6px;position:relative" id="traffic-desc">Умеренные затруднения</div>
+          <div style="margin-top:20px;font-size:12px;position:relative">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>🟢 0-3</span><span>Свободно</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>🟡 4-6</span><span>Затруднения</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>🔴 7-8</span><span>Тяжёлые</span></div>
+            <div style="display:flex;justify-content:space-between"><span>⚫ 9-10</span><span>Коллапс</span></div>
+          </div>
+          <a href="https://yandex.ru/maps/?ll=30.315635%2C59.938951&z=10&traffic=true" target="_blank" style="display:inline-block;margin-top:16px;color:var(--accent);text-decoration:none;font-size:13px;font-weight:600;position:relative">Открыть Яндекс.Карты →</a>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">⏰ Почасовой прогноз <span class="pill pill-purple" style="margin-left:8px">Яндекс.Погода</span></div>
+        <div class="hourly-forecast" id="hourly-forecast"></div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text-muted)">💡 Для точного прогноза — <a href="https://yandex.ru/pogoda/saint-petersburg/hours" target="_blank" style="color:var(--accent-5)">Яндекс.Погода почасовой →</a></div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">📅 Прогноз на неделю</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px" id="weather-forecast"></div>
+      </div>
+    </div>
+
+    <!-- NEWS -->
+    <div class="page" id="page-news">
+      <div class="page-header">
+        <div>
+          <div class="page-title">📰 Новости</div>
+          <div class="page-subtitle">Свежие новости — обновляются каждый день</div>
+        </div>
+        <div class="news-refresh">
+          <div class="news-refresh-dot"></div>
+          <span>Обновлено <span id="news-updated">только что</span></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="planner-tabs" id="news-categories">
+          <div class="planner-tab active" data-cat="all">Все</div>
+          <div class="planner-tab" data-cat="tech">Технологии</div>
+          <div class="planner-tab" data-cat="science">Наука</div>
+          <div class="planner-tab" data-cat="culture">Культура</div>
+          <div class="planner-tab" data-cat="study">Учёба</div>
+          <div class="planner-tab" data-cat="lifestyle">Лайфстайл</div>
+          <div class="planner-tab" data-cat="psych">Психология</div>
+        </div>
+        <div id="news-list"></div>
+        <div style="margin-top:16px;text-align:center">
+          <a href="https://news.yandex.ru" target="_blank" class="btn btn-ghost">🔗 Открыть Яндекс.Новости →</a>
+          <button class="btn btn-primary" onclick="refreshNews()" style="margin-left:8px">🔄 Обновить</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOKES -->
+    <div class="page" id="page-jokes">
+      <div class="page-header">
+        <div>
+          <div class="page-title">😄 Шутка дня</div>
+          <div class="page-subtitle">Новая шутка каждый день — смейся вместе с нами</div>
+        </div>
+      </div>
+
+      <div class="joke-card">
+        <div class="joke-of-day-badge">✨ Шутка дня</div>
+        <div class="joke-emoji" id="joke-emoji">😄</div>
+        <div class="joke-text" id="joke-text">Сегодняшняя шутка уже ждёт тебя!</div>
+        <div style="margin-top:16px;font-size:12px;color:var(--text-muted)" id="joke-date"></div>
+      </div>
+
+      <div style="text-align:center;margin:24px 0;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-accent" onclick="nextRandomJoke()" style="font-size:15px;padding:14px 32px">🎲 Случайная шутка</button>
+        <button class="btn btn-ghost" onclick="shareJoke()" style="padding:14px 22px">📤 Поделиться</button>
+        <button class="btn btn-primary" onclick="showDailyJoke()" style="padding:14px 22px">✨ Вернуть шутку дня</button>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">💝 Аффирмация дня</div>
+        <div id="affirmation" style="font-size:18px;font-style:italic;text-align:center;padding:20px;background:var(--gradient-4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif"></div>
+        <div style="text-align:center;margin-top:10px"><button class="btn btn-ghost btn-sm" onclick="nextAffirmation()">Другая аффирмация</button></div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">🎵 Поднималки настроения</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+          <div style="padding:14px;background:rgba(10,9,20,0.4);border-radius:12px;border:1px solid var(--border)">🐱 Милые котики<br><a href="https://www.youtube.com/results?search_query=cute+cats" target="_blank" style="font-size:12px;color:var(--accent-5)">Смотреть →</a></div>
+          <div style="padding:14px;background:rgba(10,9,20,0.4);border-radius:12px;border:1px solid var(--border)">🎶 Весёлая музыка<br><a href="https://music.yandex.ru/genres/uplifting" target="_blank" style="font-size:12px;color:var(--accent-5)">Слушать →</a></div>
+          <div style="padding:14px;background:rgba(10,9,20,0.4);border-radius:12px;border:1px solid var(--border)">🧘 Медитация<br><a href="https://www.youtube.com/results?search_query=медитация+5+минут" target="_blank" style="font-size:12px;color:var(--accent-5)">Начать →</a></div>
+          <div style="padding:14px;background:rgba(10,9,20,0.4);border-radius:12px;border:1px solid var(--border)">🌸 Вдохновение<br><a href="https://www.pinterest.com/search/pins/?q=aesthetic" target="_blank" style="font-size:12px;color:var(--accent-5)">Pinterest →</a></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-task">
+  <div class="modal">
+    <div class="modal-title">📋 Новая задача</div>
+    <div class="form-group"><label>Название</label><input type="text" id="task-title" placeholder="Например: Прочитать главу по матану"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Дата</label><input type="date" id="task-date"></div>
+      <div class="form-group"><label>Время</label><input type="time" id="task-time"></div>
+    </div>
+    <div class="form-group"><label>Категория</label>
+      <select id="task-category">
+        <option value="personal">Личное</option>
+        <option value="uni">Университет</option>
+        <option value="homework">Домашнее задание</option>
+        <option value="project">Проект</option>
+        <option value="manicure">💅 Маникюр</option>
+        <option value="clinic">🏥 Поликлиника</option>
+        <option value="appointment">Встреча</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Приоритет</label>
+      <select id="task-priority">
+        <option value="normal">Обычный</option>
+        <option value="high">Высокий 🔥</option>
+        <option value="low">Низкий</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-task')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveTask()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-schedule">
+  <div class="modal">
+    <div class="modal-title">📚 Добавить занятие</div>
+    <div class="form-group"><label>Предмет</label><input type="text" id="sch-subject" placeholder="Математический анализ"></div>
+    <div class="form-group"><label>Преподаватель</label><input type="text" id="sch-teacher" placeholder="Иванов И.И."></div>
+    <div class="form-group"><label>Аудитория</label><input type="text" id="sch-room" placeholder="305"></div>
+    <div class="form-row">
+      <div class="form-group"><label>День недели</label>
+        <select id="sch-day">
+          <option value="1">Понедельник</option><option value="2">Вторник</option><option value="3">Среда</option>
+          <option value="4">Четверг</option><option value="5">Пятница</option><option value="6">Суббота</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Тип</label>
+        <select id="sch-type">
+          <option value="лекция">Лекция</option><option value="практика">Практика</option>
+          <option value="лаба">Лабораторная</option><option value="семинар">Семинар</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Начало</label><input type="time" id="sch-start" value="09:00"></div>
+      <div class="form-group"><label>Конец</label><input type="time" id="sch-end" value="10:30"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-schedule')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveSchedule()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-appt">
+  <div class="modal">
+    <div class="modal-title">📌 Новая запись</div>
+    <div class="form-group"><label>Что</label><input type="text" id="appt-title" placeholder="Маникюр / Врач / Встреча"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Дата</label><input type="date" id="appt-date"></div>
+      <div class="form-group"><label>Время</label><input type="time" id="appt-time"></div>
+    </div>
+    <div class="form-group"><label>Место / Контакты</label><input type="text" id="appt-place" placeholder="Салон «Ногточки»"></div>
+    <div class="form-group"><label>Тип</label>
+      <select id="appt-type">
+        <option value="manicure">💅 Маникюр</option>
+        <option value="clinic">🏥 Поликлиника</option>
+        <option value="appointment">📅 Встреча</option>
+        <option value="other">📌 Другое</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Заметки</label><textarea id="appt-notes" placeholder="Взять паспорт, полис..."></textarea></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-appt')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveAppt()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-habit">
+  <div class="modal">
+    <div class="modal-title">✨ Новая привычка</div>
+    <div class="form-group"><label>Название</label><input type="text" id="habit-name" placeholder="Стакан воды утром"></div>
+    <div class="form-group"><label>Иконка</label><input type="text" id="habit-icon" placeholder="💧" maxlength="2" value="✨"></div>
+    <div class="form-group"><label>Цель (дней в неделю)</label>
+      <select id="habit-goal">
+        <option value="7">Каждый день</option>
+        <option value="5">5 дней в неделю</option>
+        <option value="3">3 дня в неделю</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-habit')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveHabit()">Создать</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-book">
+  <div class="modal">
+    <div class="modal-title">📚 Добавить книгу</div>
+    <div class="form-group"><label>Название</label><input type="text" id="book-title" placeholder="Мастер и Маргарита"></div>
+    <div class="form-group"><label>Автор</label><input type="text" id="book-author" placeholder="М. Булгаков"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Всего страниц</label><input type="number" id="book-total" placeholder="400"></div>
+      <div class="form-group"><label>Прочитано</label><input type="number" id="book-current" placeholder="0" value="0"></div>
+    </div>
+    <div class="form-group"><label>Статус</label>
+      <select id="book-status">
+        <option value="reading">📖 Читаю</option>
+        <option value="planned">📋 В планах</option>
+        <option value="done">✅ Прочитана</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Тип</label>
+      <select id="book-type">
+        <option value="paper">📕 Бумажная</option>
+        <option value="ebook">📱 Электронная</option>
+        <option value="audio">🎧 Аудиокнига</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-book')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveBook()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-day-detail">
+  <div class="modal">
+    <div class="modal-title" id="day-detail-title"></div>
+    <div id="day-detail-content"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-primary" onclick="closeModal('modal-day-detail')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-pinterest">
+  <div class="modal">
+    <div class="modal-title">📌 Добавить из Pinterest</div>
+    <div class="pinterest-search-row">
+      <button class="btn btn-accent" onclick="window.open('https://www.pinterest.com/search/pins/?q=aesthetic+study', '_blank')">🔍 Поиск в Pinterest</button>
+    </div>
+    <div class="form-group">
+      <label>Вставь URL картинки из Pinterest</label>
+      <input type="text" id="pinterest-url" placeholder="https://i.pinimg.com/...">
+      <div style="font-size:11px;color:var(--text-muted);margin-top:6px">💡 В Pinterest открой картинку → ПКМ → «Копировать адрес изображения»</div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-pinterest')">Отмена</button>
+      <button class="btn btn-primary" onclick="addPinterestImage()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-weight-goal">
+  <div class="modal">
+    <div class="modal-title">🎯 Цель по весу</div>
+    <div class="form-group">
+      <label>Целевой вес (кг)</label>
+      <input type="number" step="0.1" id="weight-goal-input" placeholder="60">
+    </div>
+    <div class="form-group">
+      <label>Направление</label>
+      <select id="weight-goal-dir">
+        <option value="lose">📉 Похудеть до цели</option>
+        <option value="gain">📈 Набрать до цели</option>
+        <option value="maintain">⚖️ Поддерживать</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Целевая дата (необязательно)</label>
+      <input type="date" id="weight-goal-date">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeModal('modal-weight-goal')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveWeightGoal()">Сохранить цель</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+const DB = {
+  get: (k, d) => { try { return JSON.parse(localStorage.getItem('cozy_' + k)) ?? d; } catch { return d; } },
+  set: (k, v) => localStorage.setItem('cozy_' + k, JSON.stringify(v))
+};
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => navigateTo(item.dataset.page));
+});
+function navigateTo(page) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
+  document.querySelector('.sidebar').classList.remove('open');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (page === 'analytics') setTimeout(renderAnalytics, 100);
+  if (page === 'calendar') renderCalendar();
+  if (page === 'books') renderBooks();
+  if (page === 'weight') renderWeight();
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); }));
+
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function formatDate(d) {
+  const date = new Date(d);
+  return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' });
+}
+const DAYS_RU = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+const MONTHS_RU = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+const MONTHS_RU_NOM = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
+// ===== ДО ВЫХОДНОГО (воскресенье) =====
+function daysUntilSunday() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const dayOfWeek = today.getDay(); // 0=вс, 1=пн, ..., 6=сб
+  if (dayOfWeek === 0) return 0; // сегодня воскресенье
+  return 7 - dayOfWeek;
+}
+function weekProgress() {
+  // Прогресс недели: пн=0%, вс=100%
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0=вс
+  // Пн=1 -> 1/7, Вт=2 -> 2/7, ..., Сб=6 -> 6/7, Вс=0 -> 7/7 (100%)
+  const passed = dayOfWeek === 0 ? 7 : dayOfWeek;
+  return (passed / 7) * 100;
+}
+function nextSundayDate() {
+  const d = new Date();
+  const daysToAdd = daysUntilSunday();
+  d.setDate(d.getDate() + daysToAdd);
+  return d;
+}
+
+// До конца учёбы (24 декабря 2026)
+const STUDY_END_DATE = new Date(2026, 11, 24);
+function daysUntilStudyEnd() {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const target = new Date(STUDY_END_DATE); target.setHours(0,0,0,0);
+  return Math.max(0, Math.ceil((target - now) / (1000 * 60 * 60 * 24)));
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => {
+    t.style.transition = 'all 0.3s';
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(20px)';
+    setTimeout(() => t.remove(), 300);
+  }, 2500);
+}
+
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ===== HOME =====
+function updateHome() {
+  const h = new Date().getHours();
+  let greeting = 'Доброе утро';
+  if (h >= 12 && h < 18) greeting = 'Добрый день';
+  else if (h >= 18 && h < 23) greeting = 'Добрый вечер';
+  else if (h >= 23 || h < 5) greeting = 'Доброй ночи';
+  document.getElementById('welcome-text').textContent = greeting + '! ✨';
+  
+  const now = new Date();
+  document.getElementById('current-date').textContent = 
+    `${DAYS_RU[now.getDay()]}, ${now.getDate()} ${MONTHS_RU[now.getMonth()]} ${now.getFullYear()}`;
+  
+  // До выходного (воскресенья)
+  const daysToSun = daysUntilSunday();
+  const sunday = nextSundayDate();
+  if (daysToSun === 0) {
+    document.getElementById('countdown-weekend').textContent = '🎉';
+    document.getElementById('countdown-weekend-title').textContent = 'Сегодня выходной!';
+    document.getElementById('countdown-weekend-sub').textContent = 'Наслаждайся воскресеньем';
+  } else {
+    document.getElementById('countdown-weekend').textContent = daysToSun;
+    document.getElementById('countdown-weekend-title').textContent = `До выходного ${daysToSun === 1 ? 'остался' : 'осталось'} ${daysToSun} ${daysToSun === 1 ? 'день' : daysToSun < 5 ? 'дня' : 'дней'}`;
+    document.getElementById('countdown-weekend-sub').textContent = `ближайшее воскресенье, ${sunday.getDate()} ${MONTHS_RU[sunday.getMonth()]}`;
+  }
+  
+  // Прогресс недели
+  const progress = weekProgress();
+  document.getElementById('week-fill').style.width = progress + '%';
+  document.getElementById('week-progress-text').textContent = Math.round(progress) + '%';
+  
+  // До конца учёбы
+  const studyDays = daysUntilStudyEnd();
+  document.getElementById('countdown-vacation').textContent = studyDays;
+  
+  // Stats
+  const tasks = DB.get('tasks', []).filter(t => !t.done && t.date === todayStr());
+  document.getElementById('stat-tasks').textContent = tasks.length;
+  
+  const mood = DB.get('moods', []).find(m => m.date === todayStr());
+  document.getElementById('stat-mood').textContent = mood ? mood.emoji : '—';
+  
+  const reading = DB.get('reading', {});
+  document.getElementById('stat-reading').textContent = reading.todayMin || 0;
+  
+  const habits = DB.get('habits', []);
+  const today = todayStr();
+  const doneToday = habits.filter(h => (h.days || {})[today]).length;
+  document.getElementById('stat-streak').textContent = doneToday;
+  
+  const homeTasks = document.getElementById('home-tasks');
+  if (tasks.length === 0) {
+    homeTasks.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🌸</div><div>Нет задач на сегодня. Ура!</div></div>';
+  } else {
+    homeTasks.innerHTML = tasks.slice(0, 5).map(t => `
+      <div class="task-item">
+        <div class="task-check ${t.done ? 'done' : ''}" onclick="toggleTask('${t.id}')">✓</div>
+        <div class="task-content">
+          <div class="task-title">${escapeHtml(t.title)}</div>
+          <div class="task-meta">${t.time || ''}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  document.getElementById('home-note').value = DB.get('homeNote_' + todayStr(), '');
+}
+function saveHomeNote() {
+  const val = document.getElementById('home-note').value;
+  DB.set('homeNote_' + todayStr(), val);
+  if (val.trim()) addNoteFromText(val);
+  showToast('Заметка сохранена 💾');
+}
+
+// ===== TASKS =====
+const TAG_NAMES = {
+  uni: ['Универ', 'tag-uni'], homework: ['ДЗ', 'tag-homework'], project: ['Проект', 'tag-project'],
+  appointment: ['Встреча', 'tag-appointment'], manicure: ['Маникюр', 'tag-manicure'],
+  clinic: ['Поликлиника', 'tag-clinic'], personal: ['Личное', 'tag-personal']
+};
+
+function openTaskModal() {
+  document.getElementById('task-title').value = '';
+  document.getElementById('task-date').value = todayStr();
+  document.getElementById('task-time').value = '';
+  document.getElementById('task-category').value = 'personal';
+  document.getElementById('task-priority').value = 'normal';
+  openModal('modal-task');
+}
+function saveTask() {
+  const title = document.getElementById('task-title').value.trim();
+  if (!title) { showToast('Введите название'); return; }
+  const tasks = DB.get('tasks', []);
+  tasks.push({
+    id: Date.now().toString(), title,
+    date: document.getElementById('task-date').value,
+    time: document.getElementById('task-time').value,
+    category: document.getElementById('task-category').value,
+    priority: document.getElementById('task-priority').value,
+    done: false, created: Date.now()
+  });
+  DB.set('tasks', tasks);
+  closeModal('modal-task');
+  renderTasks(); updateHome();
+  showToast('Задача добавлена ✅');
+}
+function toggleTask(id) {
+  const tasks = DB.get('tasks', []);
+  const t = tasks.find(x => x.id === id);
+  if (t) t.done = !t.done;
+  DB.set('tasks', tasks);
+  renderTasks(); updateHome();
+}
+function deleteTask(id) {
+  if (!confirm('Удалить задачу?')) return;
+  DB.set('tasks', DB.get('tasks', []).filter(t => t.id !== id));
+  renderTasks(); updateHome();
+}
+function renderTasks() {
+  const filter = document.getElementById('task-filter').value;
+  let tasks = DB.get('tasks', []);
+  const today = todayStr();
+  
+  if (filter === 'today') tasks = tasks.filter(t => t.date === today);
+  else if (filter === 'week') {
+    const weekEnd = new Date(); weekEnd.setDate(weekEnd.getDate() + 7);
+    tasks = tasks.filter(t => new Date(t.date) <= weekEnd);
+  } else if (['uni','homework','project','clinic','manicure','appointment'].includes(filter)) {
+    tasks = tasks.filter(t => t.category === filter);
+  }
+  
+  tasks.sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    return (a.time || '').localeCompare(b.time || '');
+  });
+  
+  const list = document.getElementById('tasks-list');
+  if (tasks.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><div>Задач нет</div></div>';
+    return;
+  }
+  
+  list.innerHTML = tasks.map(t => {
+    const [tagName, tagClass] = TAG_NAMES[t.category] || ['Задача', 'tag-personal'];
+    const prioIcon = t.priority === 'high' ? '🔥 ' : '';
+    return `
+      <div class="task-item">
+        <div class="task-check ${t.done ? 'done' : ''}" onclick="toggleTask('${t.id}')">✓</div>
+        <div class="task-content">
+          <div class="task-title ${t.done ? 'done' : ''}">${prioIcon}${escapeHtml(t.title)}</div>
+          <div class="task-meta">
+            <span class="task-tag ${tagClass}">${tagName}</span>
+            ${formatDate(t.date)}${t.time ? ' · ' + t.time : ''}
+          </div>
+        </div>
+        <div class="task-delete" onclick="deleteTask('${t.id}')">🗑️</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== SCHEDULE =====
+function openScheduleModal() {
+  ['sch-subject','sch-teacher','sch-room'].forEach(id => document.getElementById(id).value = '');
+  openModal('modal-schedule');
+}
+function saveSchedule() {
+  const subject = document.getElementById('sch-subject').value.trim();
+  if (!subject) { showToast('Введите предмет'); return; }
+  const sch = DB.get('schedule', []);
+  sch.push({
+    id: Date.now().toString(), subject,
+    teacher: document.getElementById('sch-teacher').value,
+    room: document.getElementById('sch-room').value,
+    day: document.getElementById('sch-day').value,
+    type: document.getElementById('sch-type').value,
+    start: document.getElementById('sch-start').value,
+    end: document.getElementById('sch-end').value
+  });
+  DB.set('schedule', sch);
+  closeModal('modal-schedule');
+  renderSchedule();
+  showToast('Занятие добавлено 📚');
+}
+function deleteSchedule(id) {
+  if (!confirm('Удалить?')) return;
+  DB.set('schedule', DB.get('schedule', []).filter(s => s.id !== id));
+  renderSchedule();
+}
+function renderSchedule() {
+  const sch = DB.get('schedule', []);
+  const days = {1:[],2:[],3:[],4:[],5:[],6:[]};
+  sch.forEach(s => days[s.day]?.push(s));
+  Object.values(days).forEach(arr => arr.sort((a,b) => a.start.localeCompare(b.start)));
+  
+  const dayNames = {1:'Понедельник',2:'Вторник',3:'Среда',4:'Четверг',5:'Пятница',6:'Суббота'};
+  const list = document.getElementById('schedule-list');
+  
+  if (sch.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📚</div><div>Добавь расписание</div></div>';
+    return;
+  }
+  
+  list.innerHTML = Object.entries(days).map(([d, items]) => {
+    if (items.length === 0) return '';
+    return `
+      <div class="schedule-day">
+        <div class="schedule-day-header">${dayNames[d]}</div>
+        ${items.map(s => `
+          <div class="schedule-item">
+            <div class="schedule-time">${s.start}–${s.end}</div>
+            <div style="flex:1">
+              <div style="font-weight:700">${escapeHtml(s.subject)}</div>
+              <div style="font-size:12px;color:var(--text-muted)">${s.type}${s.room ? ' · ауд. ' + s.room : ''}${s.teacher ? ' · ' + s.teacher : ''}</div>
+            </div>
+            <div class="task-delete" onclick="deleteSchedule('${s.id}')">🗑️</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== APPOINTMENTS =====
+function openApptModal() {
+  ['appt-title','appt-place','appt-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('appt-date').value = todayStr();
+  document.getElementById('appt-time').value = '';
+  openModal('modal-appt');
+}
+function saveAppt() {
+  const title = document.getElementById('appt-title').value.trim();
+  if (!title) { showToast('Введите название'); return; }
+  const appts = DB.get('appointments', []);
+  appts.push({
+    id: Date.now().toString(), title,
+    date: document.getElementById('appt-date').value,
+    time: document.getElementById('appt-time').value,
+    place: document.getElementById('appt-place').value,
+    type: document.getElementById('appt-type').value,
+    notes: document.getElementById('appt-notes').value
+  });
+  DB.set('appointments', appts);
+  closeModal('modal-appt');
+  renderAppts();
+  showToast('Запись добавлена 📌');
+}
+function deleteAppt(id) {
+  if (!confirm('Удалить?')) return;
+  DB.set('appointments', DB.get('appointments', []).filter(a => a.id !== id));
+  renderAppts();
+}
+function renderAppts() {
+  const appts = DB.get('appointments', []).sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time));
+  const list = document.getElementById('appt-list');
+  const typeIcons = {manicure:'💅',clinic:'🏥',appointment:'📅',other:'📌'};
+  
+  if (appts.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📌</div><div>Нет записей</div></div>';
+    return;
+  }
+  
+  list.innerHTML = appts.map(a => `
+    <div class="task-item">
+      <div style="font-size:24px">${typeIcons[a.type] || '📌'}</div>
+      <div class="task-content">
+        <div class="task-title">${escapeHtml(a.title)}</div>
+        <div class="task-meta">
+          ${formatDate(a.date)}${a.time ? ' · ' + a.time : ''}${a.place ? ' · ' + escapeHtml(a.place) : ''}
+          ${a.notes ? '<br>' + escapeHtml(a.notes) : ''}
+        </div>
+      </div>
+      <div class="task-delete" onclick="deleteAppt('${a.id}')">🗑️</div>
+    </div>
+  `).join('');
+}
+
+document.querySelectorAll('.planner-tab[data-ptab]').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.planner-tab[data-ptab]').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    ['tasks','schedule','appointments'].forEach(p => {
+      document.getElementById('ptab-' + p).style.display = p === tab.dataset.ptab ? 'block' : 'none';
+    });
+  });
+});
+
+// ===== CALENDAR =====
+let calendarDate = new Date();
+function changeMonth(delta) {
+  calendarDate.setMonth(calendarDate.getMonth() + delta);
+  renderCalendar();
+}
+function goToToday() {
+  calendarDate = new Date();
+  renderCalendar();
+}
+function renderCalendar() {
+  const year = calendarDate.getFullYear();
+  const month = calendarDate.getMonth();
+  document.getElementById('calendar-title').textContent = `${MONTHS_RU_NOM[month]} ${year}`;
+  
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startWeekday = (firstDay.getDay() + 6) % 7;
+  
+  const tasks = DB.get('tasks', []);
+  const schedule = DB.get('schedule', []);
+  const appts = DB.get('appointments', []);
+  const habits = DB.get('habits', []);
+  
+  const today = todayStr();
+  const grid = document.getElementById('calendar-grid');
+  const dayNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  
+  let html = dayNames.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
+  
+  const prevMonthLast = new Date(year, month, 0).getDate();
+  for (let i = startWeekday - 1; i >= 0; i--) {
+    html += `<div class="calendar-day other-month"><div class="calendar-day-num">${prevMonthLast - i}</div></div>`;
+  }
+  
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const date = new Date(year, month, d);
+    const weekday = date.getDay(); // 0=Sun
+    const isToday = dateStr === today;
+    const isSunday = weekday === 0;
+    const isSaturday = weekday === 6;
+    const isWeekend = isSunday || isSaturday;
+    const isStudyEnd = dateStr === '2026-12-24';
+    
+    const dayTasks = tasks.filter(t => t.date === dateStr);
+    const daySchedule = schedule.filter(s => {
+      const jsDay = date.getDay();
+      const schedDay = parseInt(s.day);
+      return (jsDay === 0 ? 7 : jsDay) === schedDay;
+    });
+    const dayAppts = appts.filter(a => a.date === dateStr);
+    const dayHabits = habits.filter(h => h.days?.[dateStr]);
+    
+    let markers = '';
+    if (dayTasks.length) markers += `<div class="calendar-marker marker-task" title="${dayTasks.length} задач"></div>`;
+    if (daySchedule.length) markers += `<div class="calendar-marker marker-schedule" title="${daySchedule.length} занятий"></div>`;
+    if (dayAppts.length) markers += `<div class="calendar-marker marker-appt" title="${dayAppts.length} записей"></div>`;
+    if (dayHabits.length) markers += `<div class="calendar-marker marker-habit" title="${dayHabits.length} привычек"></div>`;
+    
+    let classes = 'calendar-day';
+    if (isToday) classes += ' today';
+    else if (isSunday) classes += ' sunday';
+    else if (isWeekend) classes += ' weekend';
+    if (isStudyEnd) classes += ' study-end';
+    
+    html += `
+      <div class="${classes}" onclick="showDayDetail('${dateStr}')">
+        <div class="calendar-day-num">${d}</div>
+        ${isSunday ? '<div class="calendar-day-label" style="color:var(--accent-3)">☀️</div>' : ''}
+        ${isStudyEnd ? '<div class="calendar-day-label" style="color:var(--accent)">📚</div>' : ''}
+        <div class="calendar-day-markers">${markers}</div>
+      </div>
+    `;
+  }
+  
+  const totalCells = startWeekday + lastDay.getDate();
+  const remaining = (7 - (totalCells % 7)) % 7;
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="calendar-day other-month"><div class="calendar-day-num">${i}</div></div>`;
+  }
+  
+  grid.innerHTML = html;
+}
+
+function showDayDetail(dateStr) {
+  const date = new Date(dateStr);
+  document.getElementById('day-detail-title').textContent = formatDate(dateStr);
+  
+  const tasks = DB.get('tasks', []).filter(t => t.date === dateStr);
+  const schedule = DB.get('schedule', []).filter(s => {
+    const jsDay = date.getDay();
+    return (jsDay === 0 ? 7 : jsDay) === parseInt(s.day);
+  }).sort((a,b) => a.start.localeCompare(b.start));
+  const appts = DB.get('appointments', []).filter(a => a.date === dateStr);
+  const habits = DB.get('habits', []).filter(h => h.days?.[dateStr]);
+  const mood = DB.get('moods', []).find(m => m.date === dateStr);
+  
+  let html = '';
+  
+  if (date.getDay() === 0) {
+    html += '<div style="padding:12px;background:linear-gradient(135deg,rgba(44,182,125,0.15),rgba(61,169,252,0.1));border-radius:10px;margin-bottom:12px;font-size:13px">☀️ <strong>Выходной! Воскресенье</strong></div>';
+  }
+  if (dateStr === '2026-12-24') {
+    html += '<div style="padding:12px;background:linear-gradient(135deg,rgba(255,137,6,0.15),rgba(229,49,112,0.1));border-radius:10px;margin-bottom:12px;font-size:13px">📚 <strong>Последний день учёбы в этом семестре!</strong></div>';
+  }
+  
+  if (mood) {
+    html += `<div style="padding:12px;background:rgba(10,9,20,0.4);border-radius:10px;margin-bottom:12px;display:flex;align-items:center;gap:10px"><span style="font-size:28px">${mood.emoji}</span><div><div style="font-weight:600;font-size:13px">Настроение</div>${mood.note ? `<div style="font-size:12px;color:var(--text-muted)">${escapeHtml(mood.note)}</div>` : ''}</div></div>`;
+  }
+  
+  if (schedule.length) {
+    html += '<div style="font-weight:700;font-size:12px;color:var(--accent-5);margin:12px 0 8px;text-transform:uppercase;letter-spacing:1px">📚 Расписание</div>';
+    html += schedule.map(s => `
+      <div class="day-detail-item">
+        <div class="day-detail-item-title">${escapeHtml(s.subject)}</div>
+        <div class="day-detail-item-meta">${s.start}–${s.end} · ${s.type}${s.room ? ' · ауд. ' + s.room : ''}</div>
+      </div>
+    `).join('');
+  }
+  
+  if (tasks.length) {
+    html += '<div style="font-weight:700;font-size:12px;color:var(--accent-4);margin:12px 0 8px;text-transform:uppercase;letter-spacing:1px">📋 Задачи</div>';
+    html += tasks.map(t => `
+      <div class="day-detail-item">
+        <div class="day-detail-item-title">${t.done ? '✅' : '⬜'} ${escapeHtml(t.title)}</div>
+        <div class="day-detail-item-meta">${t.time || ''} · ${TAG_NAMES[t.category]?.[0] || ''}</div>
+      </div>
+    `).join('');
+  }
+  
+  if (appts.length) {
+    html += '<div style="font-weight:700;font-size:12px;color:var(--accent-2);margin:12px 0 8px;text-transform:uppercase;letter-spacing:1px">📌 Записи</div>';
+    html += appts.map(a => `
+      <div class="day-detail-item">
+        <div class="day-detail-item-title">${escapeHtml(a.title)}</div>
+        <div class="day-detail-item-meta">${a.time || ''}${a.place ? ' · ' + escapeHtml(a.place) : ''}</div>
+      </div>
+    `).join('');
+  }
+  
+  if (habits.length) {
+    html += '<div style="font-weight:700;font-size:12px;color:var(--accent-3);margin:12px 0 8px;text-transform:uppercase;letter-spacing:1px">✨ Привычки</div>';
+    html += habits.map(h => `
+      <div class="day-detail-item">
+        <div class="day-detail-item-title">${h.icon} ${escapeHtml(h.name)}</div>
+      </div>
+    `).join('');
+  }
+  
+  if (!html) {
+    html = '<div class="empty-state"><div class="empty-state-icon">🌸</div><div>Ничего не запланировано</div></div>';
+  }
+  
+  document.getElementById('day-detail-content').innerHTML = html;
+  openModal('modal-day-detail');
+}
+
+// ===== READER =====
+let readerTimer = null;
+let readerSeconds = 0;
+let readerRunning = false;
+
+function toggleReaderTimer() {
+  if (readerRunning) {
+    clearInterval(readerTimer);
+    readerRunning = false;
+    document.getElementById('reader-start-btn').innerHTML = '▶️ Продолжить';
+    saveReadingProgress();
+  } else {
+    readerRunning = true;
+    document.getElementById('reader-start-btn').innerHTML = '⏸️ Пауза';
+    readerTimer = setInterval(() => {
+      readerSeconds++;
+      updateReaderTimerDisplay();
+      if (readerSeconds % 60 === 0) saveReadingProgress();
+    }, 1000);
+  }
+}
+function resetReaderTimer() {
+  clearInterval(readerTimer);
+  readerRunning = false;
+  readerSeconds = 0;
+  updateReaderTimerDisplay();
+  document.getElementById('reader-start-btn').innerHTML = '▶️ Начать';
+}
+function updateReaderTimerDisplay() {
+  const m = Math.floor(readerSeconds / 60).toString().padStart(2, '0');
+  const s = (readerSeconds % 60).toString().padStart(2, '0');
+  document.getElementById('reader-timer').textContent = `${m}:${s}`;
+}
+function saveReadingProgress() {
+  const reading = DB.get('reading', {totalMin: 0, todayMin: 0, lastDate: todayStr(), history: {}});
+  if (reading.lastDate !== todayStr()) { reading.todayMin = 0; reading.lastDate = todayStr(); }
+  const mins = Math.floor(readerSeconds / 60);
+  reading.todayMin += mins;
+  reading.totalMin += mins;
+  reading.history = reading.history || {};
+  reading.history[todayStr()] = (reading.history[todayStr()] || 0) + mins;
+  DB.set('reading', reading);
+  readerSeconds = 0;
+  updateReaderTimerDisplay();
+  updateReaderStats();
+  updateHome();
+}
+function updateReaderStats() {
+  const reading = DB.get('reading', {totalMin: 0, todayMin: 0, lastDate: todayStr()});
+  if (reading.lastDate !== todayStr()) reading.todayMin = 0;
+  document.getElementById('reader-today-min').textContent = reading.todayMin;
+  document.getElementById('reader-total-min').textContent = reading.totalMin;
+  document.getElementById('reader-quotes-count').textContent = DB.get('quotes', []).length;
+}
+
+async function loadReaderText() {
+  const file = document.getElementById('reader-file').files[0];
+  const input = document.getElementById('reader-input').value;
+  
+  if (file) {
+    const name = file.name.toLowerCase();
+    if (name.endsWith('.pdf')) await loadPDF(file);
+    else if (name.endsWith('.fb2')) await loadFB2(file);
+    else {
+      const reader = new FileReader();
+      reader.onload = e => displayReaderText(e.target.result);
+      reader.readAsText(file);
+    }
+  } else if (input) displayReaderText(input);
+  else showToast('Выбери файл или вставь текст');
+}
+
+async function loadPDF(file) {
+  if (!window.pdfjsLib) { showToast('PDF библиотека не загружена'); return; }
+  showToast('Загружаем PDF...');
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  let fullText = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const strings = content.items.map(item => item.str);
+    fullText += strings.join(' ') + '\n\n';
+  }
+  displayReaderText(fullText);
+  showToast(`PDF загружен: ${pdf.numPages} стр.`);
+}
+
+async function loadFB2(file) {
+  showToast('Загружаем FB2...');
+  const text = await file.text();
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(text, 'application/xml');
+  const bodies = xml.getElementsByTagName('body');
+  let fullText = '';
+  for (const body of bodies) {
+    const sections = body.getElementsByTagName('section');
+    for (const section of sections) {
+      const ps = section.getElementsByTagName('p');
+      for (const p of ps) fullText += p.textContent.trim() + '\n\n';
+    }
+  }
+  if (!fullText.trim()) fullText = xml.documentElement.textContent.replace(/\s+/g, ' ').trim();
+  displayReaderText(fullText);
+  showToast('FB2 загружен');
+}
+
+function displayReaderText(text) {
+  const container = document.getElementById('reader-text');
+  const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
+  container.innerHTML = paragraphs.map(p => `<p>${escapeHtml(p.trim())}</p>`).join('');
+  
+  container.onmouseup = () => {
+    const sel = window.getSelection();
+    const selectedText = sel.toString().trim();
+    if (selectedText.length > 10) {
+      if (confirm(`Сохранить цитату?\n\n"${selectedText.substring(0, 80)}${selectedText.length > 80 ? '...' : ''}"`)) {
+        const quotes = DB.get('quotes', []);
+        quotes.push({ text: selectedText, date: new Date().toISOString() });
+        DB.set('quotes', quotes);
+        highlightSelection(sel);
+        renderQuotes();
+        updateReaderStats();
+        showToast('Цитата сохранена 💛');
+      }
+    }
+  };
+}
+function highlightSelection(sel) {
+  if (sel.rangeCount) {
+    const range = sel.getRangeAt(0);
+    const mark = document.createElement('mark');
+    try { range.surroundContents(mark); } catch(e) {}
+    sel.removeAllRanges();
+  }
+}
+function renderQuotes() {
+  const quotes = DB.get('quotes', []);
+  const list = document.getElementById('quotes-list');
+  if (quotes.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💛</div><div>Выделяй текст для цитат</div></div>';
+    return;
+  }
+  list.innerHTML = quotes.slice().reverse().map(q => `
+    <div class="quote-item">
+      "${escapeHtml(q.text)}"
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-style:normal">${formatDate(q.date)}</div>
+    </div>
+  `).join('');
+}
+
+// ===== BOOKS =====
+function openBookModal() {
+  ['book-title','book-author'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('book-total').value = '';
+  document.getElementById('book-current').value = '0';
+  document.getElementById('book-status').value = 'reading';
+  document.getElementById('book-type').value = 'paper';
+  openModal('modal-book');
+}
+function saveBook() {
+  const title = document.getElementById('book-title').value.trim();
+  const total = parseInt(document.getElementById('book-total').value);
+  if (!title || !total) { showToast('Заполни название и кол-во страниц'); return; }
+  const books = DB.get('books', []);
+  books.push({
+    id: Date.now().toString(), title,
+    author: document.getElementById('book-author').value,
+    total,
+    current: parseInt(document.getElementById('book-current').value) || 0,
+    status: document.getElementById('book-status').value,
+    type: document.getElementById('book-type').value,
+    created: Date.now()
+  });
+  DB.set('books', books);
+  closeModal('modal-book');
+  renderBooks();
+  showToast('Книга добавлена 📚');
+}
+function updateBookProgress(id, delta) {
+  const books = DB.get('books', []);
+  const b = books.find(x => x.id === id);
+  if (!b) return;
+  b.current = Math.max(0, Math.min(b.total, b.current + delta));
+  if (b.current >= b.total) b.status = 'done';
+  DB.set('books', books);
+  renderBooks();
+}
+function setBookStatus(id, status) {
+  const books = DB.get('books', []);
+  const b = books.find(x => x.id === id);
+  if (!b) return;
+  b.status = status;
+  if (status === 'done') b.current = b.total;
+  DB.set('books', books);
+  renderBooks();
+}
+function deleteBook(id) {
+  if (!confirm('Удалить книгу?')) return;
+  DB.set('books', DB.get('books', []).filter(b => b.id !== id));
+  renderBooks();
+}
+function renderBooks() {
+  const books = DB.get('books', []);
+  const list = document.getElementById('books-list');
+  
+  document.getElementById('books-total').textContent = books.length;
+  document.getElementById('books-done').textContent = books.filter(b => b.status === 'done').length;
+  document.getElementById('books-pages').textContent = books.reduce((s, b) => s + b.current, 0);
+  
+  if (books.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📚</div><div>Добавь свою первую книгу!</div></div>';
+    return;
+  }
+  
+  const statusLabels = { reading: '📖 Читаю', planned: '📋 В планах', done: '✅ Прочитана' };
+  const typeLabels = { paper: '📕 Бумажная', ebook: '📱 Электронная', audio: '🎧 Аудио' };
+  
+  list.innerHTML = books.map(b => {
+    const progress = Math.round((b.current / b.total) * 100);
+    return `
+      <div class="book-card">
+        <div class="book-header">
+          <div style="flex:1">
+            <div class="book-title">${escapeHtml(b.title)}</div>
+            <div class="book-author">${escapeHtml(b.author || 'Неизвестный автор')} · ${typeLabels[b.type] || ''}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;background:var(--gradient-2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${progress}%</div>
+            <div style="font-size:11px;color:var(--text-muted)">${b.current} / ${b.total} стр.</div>
+          </div>
+        </div>
+        <div class="book-progress-bar"><div class="book-progress-fill" style="width:${progress}%"></div></div>
+        <div class="book-stats">
+          <span>${statusLabels[b.status]}</span>
+          <span>Осталось: ${b.total - b.current} стр.</span>
+        </div>
+        <div class="book-controls">
+          <button class="btn btn-ghost btn-sm" onclick="updateBookProgress('${b.id}', -10)">-10</button>
+          <button class="btn btn-ghost btn-sm" onclick="updateBookProgress('${b.id}', -1)">-1</button>
+          <button class="btn btn-primary btn-sm" onclick="updateBookProgress('${b.id}', 1)">+1 стр.</button>
+          <button class="btn btn-success btn-sm" onclick="updateBookProgress('${b.id}', 10)">+10</button>
+          <select onchange="setBookStatus('${b.id}', this.value)" style="flex:1;min-width:100px;padding:6px 10px;font-size:12px">
+            <option value="reading" ${b.status==='reading'?'selected':''}>📖 Читаю</option>
+            <option value="planned" ${b.status==='planned'?'selected':''}>📋 В планах</option>
+            <option value="done" ${b.status==='done'?'selected':''}>✅ Прочитана</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" onclick="deleteBook('${b.id}')">🗑️</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== MOOD =====
+let selectedMood = null;
+document.querySelectorAll('.mood-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedMood = btn.dataset.mood;
+  });
+});
+function saveMood() {
+  if (!selectedMood) { showToast('Выбери настроение'); return; }
+  const moods = DB.get('moods', []);
+  const existing = moods.findIndex(m => m.date === todayStr());
+  const entry = { date: todayStr(), emoji: selectedMood, note: document.getElementById('mood-note').value, time: new Date().toISOString() };
+  if (existing >= 0) moods[existing] = entry;
+  else moods.push(entry);
+  DB.set('moods', moods);
+  document.getElementById('mood-note').value = '';
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  selectedMood = null;
+  renderMoodHistory();
+  renderMoodDiary();
+  updateHome();
+  showToast('Настроение сохранено 💫');
+}
+function renderMoodHistory() {
+  const moods = DB.get('moods', []);
+  const container = document.getElementById('mood-history');
+  const days = [];
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split('T')[0];
+    const m = moods.find(x => x.date === ds);
+    days.push({ date: ds, emoji: m ? m.emoji : '', day: d.getDate() });
+  }
+  container.innerHTML = days.map(d => `
+    <div class="mood-day" title="${d.date}">
+      ${d.emoji || ''}
+      <div class="mood-day-label">${d.day}</div>
+    </div>
+  `).join('');
+}
+function renderMoodDiary() {
+  const moods = DB.get('moods', []).slice().reverse();
+  const diary = document.getElementById('mood-diary');
+  if (moods.length === 0) {
+    diary.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💭</div><div>Пока нет записей</div></div>';
+    return;
+  }
+  diary.innerHTML = moods.slice(0, 10).map(m => `
+    <div style="padding:14px;background:rgba(10,9,20,0.4);border:1px solid var(--border);border-radius:12px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-size:28px">${m.emoji}</span>
+        <div>
+          <div style="font-weight:700;font-size:13px">${formatDate(m.date)}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${new Date(m.time).toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+      </div>
+      ${m.note ? `<div style="font-size:13px;color:var(--text-soft)">${escapeHtml(m.note)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+// ===== HABITS =====
+function openHabitModal() {
+  document.getElementById('habit-name').value = '';
+  document.getElementById('habit-icon').value = '✨';
+  openModal('modal-habit');
+}
+function saveHabit() {
+  const name = document.getElementById('habit-name').value.trim();
+  if (!name) { showToast('Введите название'); return; }
+  const habits = DB.get('habits', []);
+  habits.push({
+    id: Date.now().toString(), name,
+    icon: document.getElementById('habit-icon').value || '✨',
+    goal: parseInt(document.getElementById('habit-goal').value),
+    days: {}, created: Date.now()
+  });
+  DB.set('habits', habits);
+  closeModal('modal-habit');
+  renderHabits(); updateHome();
+  showToast('Привычка создана ✨');
+}
+function toggleHabitDay(habitId, date) {
+  const habits = DB.get('habits', []);
+  const h = habits.find(x => x.id === habitId);
+  if (!h) return;
+  h.days = h.days || {};
+  if (h.days[date]) delete h.days[date];
+  else h.days[date] = true;
+  DB.set('habits', habits);
+  renderHabits(); updateHome();
+}
+function deleteHabit(id) {
+  if (!confirm('Удалить привычку?')) return;
+  DB.set('habits', DB.get('habits', []).filter(h => h.id !== id));
+  renderHabits(); updateHome();
+}
+function renderHabits() {
+  const habits = DB.get('habits', []);
+  const list = document.getElementById('habits-list');
+  if (habits.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✨</div><div>Создай первую привычку!</div></div>';
+    return;
+  }
+  const today = new Date();
+  
+  list.innerHTML = habits.map(h => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today); d.setDate(d.getDate() - i);
+      const ds = d.toISOString().split('T')[0];
+      days.push({ date: ds, done: h.days?.[ds], dayNum: d.getDate() });
+    }
+    let streak = 0;
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(today); d.setDate(d.getDate() - i);
+      const ds = d.toISOString().split('T')[0];
+      if (h.days?.[ds]) streak++;
+      else break;
+    }
+    return `
+      <div class="habit-item">
+        <div class="habit-header">
+          <div class="habit-name">${h.icon} ${escapeHtml(h.name)}</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <div class="habit-streak">🔥 ${streak} дн.</div>
+            <div class="task-delete" onclick="deleteHabit('${h.id}')">🗑️</div>
+          </div>
+        </div>
+        <div class="habit-days">
+          ${days.map(d => `
+            <div class="habit-day ${d.done ? 'done' : ''}" onclick="toggleHabitDay('${h.id}','${d.date}')" title="${d.date}">
+              ${d.done ? '✓' : d.dayNum}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== WEIGHT =====
+function addWeight() {
+  const w = parseFloat(document.getElementById('weight-input').value);
+  const d = document.getElementById('weight-date').value || todayStr();
+  if (!w) { showToast('Введите вес'); return; }
+  const weights = DB.get('weights', []);
+  weights.push({ weight: w, date: d });
+  weights.sort((a,b) => a.date.localeCompare(b.date));
+  DB.set('weights', weights);
+  document.getElementById('weight-input').value = '';
+  renderWeight();
+  showToast('Записано ⚖️');
+}
+function deleteWeight(i) {
+  const weights = DB.get('weights', []);
+  weights.splice(i, 1);
+  DB.set('weights', weights);
+  renderWeight();
+}
+
+function openWeightGoalModal() {
+  const goal = DB.get('weightGoal', null);
+  if (goal) {
+    document.getElementById('weight-goal-input').value = goal.target || '';
+    document.getElementById('weight-goal-dir').value = goal.direction || 'lose';
+    document.getElementById('weight-goal-date').value = goal.targetDate || '';
+  } else {
+    document.getElementById('weight-goal-input').value = '';
+    document.getElementById('weight-goal-dir').value = 'lose';
+    document.getElementById('weight-goal-date').value = '';
+  }
+  openModal('modal-weight-goal');
+}
+function saveWeightGoal() {
+  const target = parseFloat(document.getElementById('weight-goal-input').value);
+  if (!target) { showToast('Введите целевой вес'); return; }
+  DB.set('weightGoal', {
+    target,
+    direction: document.getElementById('weight-goal-dir').value,
+    targetDate: document.getElementById('weight-goal-date').value
+  });
+  closeModal('modal-weight-goal');
+  renderWeight();
+  showToast('Цель сохранена 🎯');
+}
+
+function renderWeightGoal() {
+  const goal = DB.get('weightGoal', null);
+  const weights = DB.get('weights', []);
+  const content = document.getElementById('weight-goal-content');
+  
+  if (!goal) {
+    content.innerHTML = `
+      <div style="text-align:center;padding:10px 0;position:relative">
+        <div style="font-size:14px;color:var(--text-soft);margin-bottom:10px">Цель ещё не установлена</div>
+        <button class="btn btn-success btn-sm" onclick="openWeightGoalModal()">🎯 Установить цель</button>
+      </div>
+    `;
+    return;
+  }
+  
+  const current = weights.length > 0 ? weights[weights.length - 1].weight : null;
+  const start = weights.length > 0 ? weights[0].weight : null;
+  const dirLabels = { lose: '📉 Похудеть', gain: '📈 Набрать', maintain: '⚖️ Поддерживать' };
+  
+  let progressPercent = 0;
+  let remaining = null;
+  
+  if (current !== null) {
+    if (goal.direction === 'lose' && start > goal.target) {
+      // Похудение: прогресс от start к goal
+      const totalToLose = start - goal.target;
+      const lost = start - current;
+      progressPercent = Math.max(0, Math.min(100, (lost / totalToLose) * 100));
+      remaining = Math.max(0, current - goal.target);
+    } else if (goal.direction === 'gain' && start < goal.target) {
+      const totalToGain = goal.target - start;
+      const gained = current - start;
+      progressPercent = Math.max(0, Math.min(100, (gained / totalToGain) * 100));
+      remaining = Math.max(0, goal.target - current);
+    } else if (goal.direction === 'maintain') {
+      // Для поддержания — показываем отклонение
+      const diff = Math.abs(current - goal.target);
+      progressPercent = Math.max(0, 100 - diff * 5);
+      remaining = diff;
+    }
+  }
+  
+  let targetDateInfo = '';
+  if (goal.targetDate) {
+    const td = new Date(goal.targetDate);
+    const daysLeft = Math.ceil((td - new Date()) / (1000 * 60 * 60 * 24));
+    if (daysLeft > 0) {
+      targetDateInfo = `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">До цели: ${daysLeft} ${daysLeft === 1 ? 'день' : daysLeft < 5 ? 'дня' : 'дней'} (до ${td.getDate()} ${MONTHS_RU[td.getMonth()]})</div>`;
+    } else {
+      targetDateInfo = `<div style="font-size:11px;color:var(--accent-3);margin-top:4px">✓ Целевая дата достигнута</div>`;
+    }
+  }
+  
+  content.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;position:relative">
+      <div>
+        <div style="font-size:13px;color:var(--text-soft)">${dirLabels[goal.direction]} до <strong style="color:var(--text)">${goal.target} кг</strong></div>
+        ${targetDateInfo}
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:32px;font-weight:800;background:var(--gradient-2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">${Math.round(progressPercent)}%</div>
+      </div>
+    </div>
+    <div class="weight-goal-progress-bar">
+      <div class="weight-goal-progress-fill" style="width:${progressPercent}%"></div>
+    </div>
+    <div class="weight-goal-stats">
+      <div class="weight-goal-stat">
+        <div class="weight-goal-stat-val" style="color:var(--accent)">${current !== null ? current + ' кг' : '—'}</div>
+        <div class="weight-goal-stat-lbl">Сейчас</div>
+      </div>
+      <div class="weight-goal-stat">
+        <div class="weight-goal-stat-val" style="color:var(--accent-4)">${goal.target} кг</div>
+        <div class="weight-goal-stat-lbl">Цель</div>
+      </div>
+      <div class="weight-goal-stat">
+        <div class="weight-goal-stat-val" style="color:var(--accent-3)">${remaining !== null ? remaining.toFixed(1) + ' кг' : '—'}</div>
+        <div class="weight-goal-stat-lbl">${goal.direction === 'lose' ? 'Осталось сбросить' : goal.direction === 'gain' ? 'Осталось набрать' : 'Отклонение'}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderWeight() {
+  const weights = DB.get('weights', []);
+  document.getElementById('weight-date').value = todayStr();
+  
+  renderWeightGoal();
+  
+  if (weights.length > 0) {
+    document.getElementById('weight-current').textContent = weights[weights.length-1].weight + ' кг';
+    document.getElementById('weight-start').textContent = weights[0].weight + ' кг';
+    const diff = (weights[weights.length-1].weight - weights[0].weight).toFixed(1);
+    document.getElementById('weight-diff').textContent = (diff > 0 ? '+' : '') + diff + ' кг';
+  } else {
+    ['weight-current','weight-start','weight-diff'].forEach(id => document.getElementById(id).textContent = '—');
+  }
+  
+  const chart = document.getElementById('weight-chart');
+  if (weights.length < 2) {
+    chart.innerHTML = '<div style="text-align:center;padding-top:60px;color:var(--text-muted)">Нужно минимум 2 записи</div>';
+  } else {
+    const w = chart.clientWidth - 40;
+    const h = 160;
+    const goal = DB.get('weightGoal', null);
+    const allValues = weights.map(x => x.weight);
+    if (goal) allValues.push(goal.target);
+    const min = Math.min(...allValues) - 1;
+    const max = Math.max(...allValues) + 1;
+    const range = max - min || 1;
+    const points = weights.map((x, i) => {
+      const px = 20 + (i / (weights.length - 1)) * w;
+      const py = 10 + (1 - (x.weight - min) / range) * h;
+      return [px, py];
+    });
+    const path = points.map((p, i) => (i === 0 ? 'M' : 'L') + p[0] + ',' + p[1]).join(' ');
+    
+    let goalLine = '';
+    if (goal) {
+      const goalY = 10 + (1 - (goal.target - min) / range) * h;
+      goalLine = `
+        <line x1="20" y1="${goalY}" x2="${w+20}" y2="${goalY}" stroke="#2CB67D" stroke-width="1.5" stroke-dasharray="5,5" opacity="0.6"/>
+        <text x="${w+15}" y="${goalY-5}" fill="#2CB67D" font-size="10" text-anchor="end" font-weight="700">🎯 ${goal.target} кг</text>
+      `;
+    }
+    
+    chart.innerHTML = `
+      <svg width="100%" height="100%" viewBox="0 0 ${w+40} ${h+30}" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#7F5AF0" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#7F5AF0" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        ${goalLine}
+        <path d="${path} L ${points[points.length-1][0]},${h+10} L ${points[0][0]},${h+10} Z" fill="url(#wg)"/>
+        <path d="${path}" stroke="#7F5AF0" stroke-width="2" fill="none"/>
+        ${points.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#7F5AF0"/>`).join('')}
+      </svg>
+    `;
+  }
+  
+  const hist = document.getElementById('weight-history');
+  if (weights.length === 0) {
+    hist.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚖️</div><div>Нет измерений</div></div>';
+    return;
+  }
+  hist.innerHTML = weights.slice().reverse().map((w, i) => {
+    const idx = weights.length - 1 - i;
+    return `
+      <div class="weight-entry">
+        <span>${formatDate(w.date)}</span>
+        <span><strong>${w.weight} кг</strong></span>
+        <span class="task-delete" onclick="deleteWeight(${idx})">🗑️</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// ===== NOTES =====
+function addNote() {
+  const text = document.getElementById('new-note').value.trim();
+  if (!text) { showToast('Напиши что-нибудь'); return; }
+  addNoteFromText(text);
+  document.getElementById('new-note').value = '';
+}
+function addNoteFromText(text) {
+  const notes = DB.get('notes', []);
+  notes.unshift({ id: Date.now().toString(), text, date: new Date().toISOString() });
+  DB.set('notes', notes);
+  renderNotes();
+}
+function deleteNote(id) {
+  DB.set('notes', DB.get('notes', []).filter(n => n.id !== id));
+  renderNotes();
+}
+function renderNotes() {
+  const notes = DB.get('notes', []);
+  const list = document.getElementById('notes-list');
+  if (notes.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><div>Пока нет заметок</div></div>';
+    return;
+  }
+  list.innerHTML = notes.map(n => `
+    <div class="note-card">
+      <div class="note-date">${formatDate(n.date)} · ${new Date(n.date).toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'})}</div>
+      <div class="note-text">${escapeHtml(n.text)}</div>
+      <div class="note-delete" onclick="deleteNote('${n.id}')">🗑️</div>
+    </div>
+  `).join('');
+}
+
+// ===== SCRAPBOOK =====
+let selectedScrapItem = null;
+let scrapZIndex = 10;
+
+function addScrapText() {
+  const text = prompt('Введите текст:');
+  if (!text) return;
+  const el = document.createElement('div');
+  el.className = 'scrap-item';
+  el.textContent = text;
+  el.style.background = document.getElementById('scrap-color').value;
+  el.style.color = '#fff';
+  el.style.left = '50px'; el.style.top = '50px';
+  el.style.fontSize = '16px'; el.style.fontWeight = '600';
+  makeDraggable(el);
+  document.getElementById('scrap-canvas').appendChild(el);
+  selectScrapItem(el);
+}
+function addScrapSticker() {
+  const stickers = ['🌸','🌺','🌻','🌷','🌹','💐','🍀','🌿','🦋','⭐','✨','💫','🌙','☀️','🌈','💖','💝','🎀','🎨','📚','☕','🍰','🧸','🎵','🌟','🍃','🕊️','🌾'];
+  const sticker = stickers[Math.floor(Math.random() * stickers.length)];
+  const el = document.createElement('div');
+  el.className = 'scrap-item scrap-sticker';
+  el.textContent = sticker;
+  el.style.left = (50 + Math.random() * 200) + 'px';
+  el.style.top = (50 + Math.random() * 200) + 'px';
+  makeDraggable(el);
+  document.getElementById('scrap-canvas').appendChild(el);
+  selectScrapItem(el);
+}
+function addScrapImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const el = document.createElement('div');
+    el.className = 'scrap-item';
+    el.style.padding = '0'; el.style.background = 'transparent';
+    el.style.left = '50px'; el.style.top = '50px';
+    const img = document.createElement('img');
+    img.src = ev.target.result;
+    img.className = 'scrap-photo';
+    el.appendChild(img);
+    makeDraggable(el);
+    document.getElementById('scrap-canvas').appendChild(el);
+    selectScrapItem(el);
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+function addScrapShape() {
+  const shapes = ['circle', 'square', 'heart'];
+  const shape = shapes[Math.floor(Math.random() * shapes.length)];
+  const color = document.getElementById('scrap-color').value;
+  const el = document.createElement('div');
+  el.className = 'scrap-item';
+  el.style.padding = '0'; el.style.background = 'transparent';
+  el.style.left = '100px'; el.style.top = '100px';
+  let svg = '';
+  if (shape === 'circle') svg = `<svg width="80" height="80"><circle cx="40" cy="40" r="38" fill="${color}"/></svg>`;
+  else if (shape === 'square') svg = `<svg width="80" height="80"><rect x="2" y="2" width="76" height="76" rx="8" fill="${color}"/></svg>`;
+  else svg = `<svg width="80" height="80" viewBox="0 0 80 80"><path d="M40 70 C 10 45, 10 20, 30 20 C 35 20, 40 25, 40 30 C 40 25, 45 20, 50 20 C 70 20, 70 45, 40 70 Z" fill="${color}"/></svg>`;
+  el.innerHTML = svg;
+  makeDraggable(el);
+  document.getElementById('scrap-canvas').appendChild(el);
+  selectScrapItem(el);
+}
+function openPinterestModal() {
+  document.getElementById('pinterest-url').value = '';
+  openModal('modal-pinterest');
+}
+function addPinterestImage() {
+  const url = document.getElementById('pinterest-url').value.trim();
+  if (!url) { showToast('Вставь URL картинки'); return; }
+  const el = document.createElement('div');
+  el.className = 'scrap-item';
+  el.style.padding = '0'; el.style.background = 'transparent';
+  el.style.left = '50px'; el.style.top = '50px';
+  const img = document.createElement('img');
+  img.src = url;
+  img.className = 'scrap-photo';
+  img.onerror = () => { showToast('Не удалось загрузить картинку'); el.remove(); };
+  el.appendChild(img);
+  makeDraggable(el);
+  document.getElementById('scrap-canvas').appendChild(el);
+  selectScrapItem(el);
+  closeModal('modal-pinterest');
+  showToast('Картинка из Pinterest добавлена 📌');
+}
+function makeDraggable(el) {
+  let offsetX, offsetY, isDragging = false;
+  el.addEventListener('mousedown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    isDragging = true;
+    offsetX = e.clientX - el.offsetLeft;
+    offsetY = e.clientY - el.offsetTop;
+    el.style.zIndex = ++scrapZIndex;
+    selectScrapItem(el);
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    el.style.left = (e.clientX - offsetX) + 'px';
+    el.style.top = (e.clientY - offsetY) + 'px';
+  });
+  document.addEventListener('mouseup', () => { isDragging = false; });
+  el.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    offsetX = t.clientX - el.offsetLeft;
+    offsetY = t.clientY - el.offsetTop;
+    el.style.zIndex = ++scrapZIndex;
+    selectScrapItem(el);
+  });
+  el.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    el.style.left = (t.clientX - offsetX) + 'px';
+    el.style.top = (t.clientY - offsetY) + 'px';
+    e.preventDefault();
+  });
+}
+function selectScrapItem(el) {
+  document.querySelectorAll('.scrap-item').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedScrapItem = el;
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.scrap-item') && e.target.closest('.scrapbook-canvas')) {
+    document.querySelectorAll('.scrap-item').forEach(e => e.classList.remove('selected'));
+    selectedScrapItem = null;
+  }
+});
+function deleteSelectedScrap() {
+  if (selectedScrapItem) { selectedScrapItem.remove(); selectedScrapItem = null; }
+}
+function clearScrapbook() {
+  if (!confirm('Очистить холст?')) return;
+  document.getElementById('scrap-canvas').innerHTML = '';
+  selectedScrapItem = null;
+}
+function saveScrapbook() {
+  const canvas = document.getElementById('scrap-canvas');
+  const items = Array.from(canvas.children).map(el => ({
+    html: el.outerHTML, left: el.style.left, top: el.style.top
+  }));
+  const name = prompt('Название работы:', 'Мой коллаж ' + new Date().toLocaleDateString('ru-RU'));
+  if (!name) return;
+  const saved = DB.get('scraps', []);
+  saved.push({ id: Date.now().toString(), name, items, bg: canvas.style.background || '#1C1A2B', date: new Date().toISOString() });
+  DB.set('scraps', saved);
+  renderSavedScraps();
+  showToast('Работа сохранена 🎨');
+}
+function renderSavedScraps() {
+  const saved = DB.get('scraps', []);
+  const container = document.getElementById('saved-scraps');
+  if (saved.length === 0) {
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:20px">Нет сохранённых работ</div>';
+    return;
+  }
+  container.innerHTML = saved.map(s => `
+    <div style="background:rgba(10,9,20,0.4);border:1px solid var(--border);border-radius:12px;padding:10px;cursor:pointer;transition:all 0.3s" onclick="loadScrap('${s.id}')" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''">
+      <div style="height:100px;background:${s.bg};border-radius:8px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden">🎨</div>
+      <div style="font-size:12px;font-weight:700">${escapeHtml(s.name)}</div>
+      <div style="font-size:10px;color:var(--text-muted)">${formatDate(s.date)}</div>
+    </div>
+  `).join('');
+}
+function loadScrap(id) {
+  const saved = DB.get('scraps', []);
+  const s = saved.find(x => x.id === id);
+  if (!s) return;
+  if (!confirm('Загрузить эту работу?')) return;
+  const canvas = document.getElementById('scrap-canvas');
+  canvas.innerHTML = '';
+  canvas.style.background = s.bg;
+  s.items.forEach(item => {
+    const div = document.createElement('div');
+    div.innerHTML = item.html;
+    const el = div.firstChild;
+    el.style.left = item.left;
+    el.style.top = item.top;
+    makeDraggable(el);
+    canvas.appendChild(el);
+  });
+  showToast('Работа загружена ✨');
+}
+
+// ===== WEATHER =====
+function updateWeather() {
+  const month = new Date().getMonth();
+  const isWinter = month === 10 || month === 11 || month <= 1;
+  const baseTemp = isWinter ? -2 : 15;
+  const dateSeed = new Date().toDateString().split('').reduce((a,c) => a + c.charCodeAt(0), 0);
+  const temp = baseTemp + ((dateSeed % 7) - 3);
+  const feels = temp - 3;
+  const icons = ['🌤️','⛅','☁️','🌨️','🌧️'];
+  const descs = ['Малооблачно','Облачно с прояснениями','Пасмурно','Небольшой снег','Переменная облачность'];
+  const idx = dateSeed % icons.length;
+  
+  const traffic = getTrafficLevel();
+  
+  document.getElementById('home-weather-icon').textContent = icons[idx];
+  document.getElementById('home-weather-temp').textContent = (temp > 0 ? '+' : '') + temp + '°';
+  document.getElementById('home-weather-desc').textContent = descs[idx];
+  document.getElementById('home-weather-wind').textContent = (2 + (dateSeed % 6)) + ' м/с';
+  document.getElementById('home-traffic-level').textContent = traffic;
+  document.getElementById('home-traffic-desc').textContent = getTrafficDesc(traffic);
+  
+  document.getElementById('weather-temp').textContent = (temp > 0 ? '+' : '') + temp + '°';
+  document.getElementById('weather-feels').textContent = (feels > 0 ? '+' : '') + feels + '°';
+  document.getElementById('weather-icon').textContent = icons[idx];
+  document.getElementById('weather-desc').textContent = descs[idx];
+  document.getElementById('weather-wind').textContent = (2 + (dateSeed % 6)) + ' м/с';
+  document.getElementById('weather-hum').textContent = (60 + (dateSeed % 30)) + '%';
+  document.getElementById('weather-city').textContent = '📍 ' + DB.get('weatherCity', 'Санкт-Петербург');
+  
+  document.getElementById('traffic-level').textContent = traffic;
+  document.getElementById('traffic-desc').textContent = getTrafficDesc(traffic);
+  
+  renderHourlyForecast(temp, icons[idx]);
+  
+  const forecast = document.getElementById('weather-forecast');
+  const dayNamesShort = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(); d.setDate(d.getDate() + i);
+    const seed = (dateSeed + i * 7) % 100;
+    const t = temp + ((seed % 5) - 2);
+    const ic = icons[seed % icons.length];
+    html += `
+      <div style="text-align:center;padding:14px;background:rgba(10,9,20,0.4);border:1px solid var(--border);border-radius:12px;transition:all 0.3s" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='var(--accent-5)'" onmouseout="this.style.transform='';this.style.borderColor='var(--border)'">
+        <div style="font-size:11px;color:var(--text-muted);font-weight:600">${i === 0 ? 'Сегодня' : dayNamesShort[d.getDay()]}</div>
+        <div style="font-size:28px;margin:8px 0">${ic}</div>
+        <div style="font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;font-size:18px">${(t > 0 ? '+' : '') + t}°</div>
+      </div>
+    `;
+  }
+  forecast.innerHTML = html;
+}
+
+function renderHourlyForecast(baseTemp, currentIcon) {
+  const container = document.getElementById('hourly-forecast');
+  const now = new Date();
+  const currentHour = now.getHours();
+  const icons = ['🌤️','⛅','☁️','🌧️','🌨️','🌙','🌙','⛅'];
+  let html = '';
+  for (let i = 0; i < 24; i++) {
+    const h = (currentHour + i) % 24;
+    const isNow = i === 0;
+    const hourFactor = Math.sin((h - 6) * Math.PI / 12);
+    const t = Math.round(baseTemp + hourFactor * 3 + (i % 3 - 1));
+    const iconIdx = (h >= 20 || h < 6) ? 4 + (h % 3) : (h + i) % 4;
+    const icon = isNow ? currentIcon : icons[iconIdx];
+    const label = isNow ? 'Сейчас' : `${String(h).padStart(2,'0')}:00`;
+    
+    html += `
+      <div class="hour-item ${isNow ? 'now' : ''}">
+        <div class="hour-time">${label}</div>
+        <div class="hour-icon">${icon}</div>
+        <div class="hour-temp">${(t > 0 ? '+' : '') + t}°</div>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+function getTrafficLevel() {
+  const h = new Date().getHours();
+  const dateSeed = new Date().toDateString().split('').reduce((a,c) => a + c.charCodeAt(0), 0);
+  let base = 3;
+  if ((h >= 8 && h <= 10) || (h >= 17 && h <= 19)) base = 6;
+  else if (h >= 11 && h <= 16) base = 4;
+  else base = 2;
+  return Math.min(10, base + (dateSeed % 3));
+}
+function getTrafficDesc(level) {
+  const descs = {1:'Свободно',2:'Свободно',3:'Почти свободно',4:'Небольшие затруднения',5:'Умеренные затруднения',6:'Заметные затруднения',7:'Тяжёлые пробки',8:'Очень тяжёлые',9:'Коллапс',10:'Стоят'};
+  return descs[level] || 'Затруднения';
+}
+
+// ===== NEWS =====
+const NEWS_POOL = {
+  tech: [
+    { title: 'ИИ научился предсказывать настроение по тексту', source: 'TechToday' },
+    { title: 'Новая версия VS Code с улучшенной поддержкой ИИ', source: 'DevNews' },
+    { title: 'Квантовые компьютеры сделали шаг к практическому применению', source: 'ScienceDaily' },
+    { title: 'Apple представила новый MacBook с чипом M5', source: 'AppleInsider' },
+    { title: 'Нейросети научились писать код лучше программистов', source: 'Хабр' }
+  ],
+  science: [
+    { title: 'Учёные открыли новый механизм памяти в мозге', source: 'Nature' },
+    { title: 'Телескоп Джеймс Уэбб сфотографировал далёкую галактику', source: 'NASA' },
+    { title: 'Найдена связь между сном и креативностью', source: 'PsychScience' },
+    { title: 'Российские учёные создали новый материал для батарей', source: 'Наука РФ' }
+  ],
+  culture: [
+    { title: 'Выставка современного искусства открылась в Эрмитаже', source: 'Культура' },
+    { title: 'Новый фильм российского режиссёра получил приз', source: 'КиноПоиск' },
+    { title: 'Лекция о скандинавской литературе: онлайн-трансляция', source: 'Arzamas' },
+    { title: 'В Петербурге открылся новый театр', source: 'Афиша' }
+  ],
+  study: [
+    { title: 'Как эффективно готовиться к сессии: 7 методов', source: 'StudyHub' },
+    { title: 'Бесплатные онлайн-курсы от ведущих университетов', source: 'Coursera' },
+    { title: 'Тайм-менеджмент для студентов: метод помидора 2.0', source: 'Учёба.ру' },
+    { title: 'Министерство образования изменило правила приёма', source: 'Рособрнадзор' }
+  ],
+  lifestyle: [
+    { title: '5 уютных кафе для учёбы в центре Петербурга', source: 'Афиша' },
+    { title: 'Зимние рецепты: горячий шоколад и имбирный латте', source: 'Eda.ru' },
+    { title: 'Как создать уют дома: идеи для осеннего декора', source: 'Pinterest' },
+    { title: 'Новые маршруты для прогулок по Петербургу', source: 'Tripster' }
+  ],
+  psych: [
+    { title: 'Как справиться с осенней хандрой: советы психолога', source: 'Psychologies' },
+    { title: 'Медитация для студентов: 5 минут в день меняют всё', source: 'Mindful' },
+    { title: 'Почему прокрастинация — это не лень', source: 'PsychToday' },
+    { title: 'Исследование: как музыка влияет на учёбу', source: 'Science' }
+  ]
+};
+
+function getDailyNews() {
+  const today = new Date();
+  const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  
+  const allNews = [];
+  Object.entries(NEWS_POOL).forEach(([cat, items]) => {
+    items.forEach((item, idx) => {
+      const seed = (dateSeed + idx * 7) % 1000;
+      if (seed % 3 !== 0) {
+        allNews.push({ ...item, cat, seed });
+      }
+    });
+  });
+  
+  allNews.sort((a, b) => a.seed - b.seed);
+  
+  const hoursAgo = [1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24];
+  return allNews.map((n, i) => ({
+    ...n,
+    time: hoursAgo[i % hoursAgo.length] + ' часов назад',
+    id: dateSeed + '-' + i
+  }));
+}
+
+let currentNewsCat = 'all';
+let cachedNews = null;
+let newsUpdateTime = null;
+
+function refreshNews() {
+  cachedNews = getDailyNews();
+  newsUpdateTime = new Date();
+  renderNews();
+  document.getElementById('news-updated').textContent = 'только что';
+  showToast('Новости обновлены 📰');
+}
+
+function renderNews() {
+  if (!cachedNews) cachedNews = getDailyNews();
+  const list = document.getElementById('news-list');
+  const filtered = currentNewsCat === 'all' ? cachedNews : cachedNews.filter(n => n.cat === currentNewsCat);
+  
+  const catIcons = { tech: '💻', science: '🔬', culture: '🎭', study: '🎓', lifestyle: '🌿', psych: '🧠' };
+  const yandexLinks = {
+    tech: 'https://news.yandex.ru/computer_world',
+    science: 'https://news.yandex.ru/science',
+    culture: 'https://news.yandex.ru/culture',
+    study: 'https://news.yandex.ru/science',
+    lifestyle: 'https://news.yandex.ru/story',
+    psych: 'https://news.yandex.ru/health'
+  };
+  
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📰</div><div>Нет новостей в этой категории</div></div>';
+    return;
+  }
+  
+  list.innerHTML = filtered.map(n => `
+    <a href="${yandexLinks[n.cat] || 'https://news.yandex.ru'}" target="_blank" style="text-decoration:none;color:inherit">
+      <div class="news-item">
+        <div class="news-icon">${catIcons[n.cat] || '📰'}</div>
+        <div class="news-content">
+          <div class="news-title">${escapeHtml(n.title)}</div>
+          <div class="news-meta">${n.source} · ${n.time}</div>
+        </div>
+      </div>
+    </a>
+  `).join('');
+  
+  if (newsUpdateTime) {
+    const mins = Math.floor((new Date() - newsUpdateTime) / 60000);
+    document.getElementById('news-updated').textContent = mins < 1 ? 'только что' : `${mins} мин назад`;
+  }
+}
+
+document.querySelectorAll('#news-categories .planner-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#news-categories .planner-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentNewsCat = tab.dataset.cat;
+    renderNews();
+  });
+});
+
+// ===== JOKES (шутка дня + случайные) =====
+const JOKES = [
+  { emoji: '📚', text: 'Студент перед сессией: "Я не учил, потому что готовился морально."' },
+  { emoji: '☕', text: '— Какой твой тип кофе?\n— Экзистенциальный кризис с молоком.' },
+  { emoji: '💻', text: 'Мой код работает. Я не знаю почему. Я боюсь спросить.' },
+  { emoji: '🌧️', text: 'Питерский ноябрь: когда утром темно, днём серо, вечером снова темно. Идеально для учёбы!' },
+  { emoji: '📝', text: 'Дедлайн — это не когда пора, это когда уже поздно, но ещё не очень страшно.' },
+  { emoji: '🎓', text: 'Высшая математика: когда ты не понимаешь, что не понимаешь.' },
+  { emoji: '🍕', text: 'Лучшая диета — это когда забываешь поесть, потому что учишься.' },
+  { emoji: '😴', text: 'Сон перед экзаменом — это как сохранение игры. Только иногда файл повреждается.' },
+  { emoji: '📖', text: '— Сколько страниц ты прочитал?\n— Достаточно, чтобы понять, что не прочитал достаточно.' },
+  { emoji: '🎨', text: 'Творческий кризис — это когда ты гений, но никто не знает.' },
+  { emoji: '🌸', text: 'Помни: даже в самый серый питерский день можно надеть яркий свитер.' },
+  { emoji: '🧘', text: 'Дыши. Ты справишься. А если нет — перерыв никто не отменял.' },
+  { emoji: '🐱', text: 'Если бы коты сдавали сессию, они бы всё равно спали.' },
+  { emoji: '🎵', text: 'Плейлист для учёбы: 50% лоу-фай, 50% паника.' },
+  { emoji: '🌙', text: 'Ночная учёба: когда в 3 часа ночи ты либо гений, либо спишь на клавиатуре.' },
+  { emoji: '🍵', text: 'Чай с мёдом — лучшее лекарство от всего, кроме дедлайнов.' },
+  { emoji: '📅', text: 'Понедельник: маленькая жизнь, полная больших надежд и ещё больших задач.' },
+  { emoji: '🎉', text: 'Пятница: день, когда даже будильник улыбается.' },
+  { emoji: '🌉', text: 'Разводные мосты — единственное, что напоминает нам, что в Питере есть не только дождь.' },
+  { emoji: '🎂', text: 'Мой уровень энергии: зарядка на 3%, но я работаю в энергосберегающем режиме.' },
+  { emoji: '📚', text: 'Библиотечный этикет: когда ты шикаешь на того, кто громко дышит.' },
+  { emoji: '🍜', text: 'Студенческая кухня: 90% рецептов — это "добавь то, что есть в холодильнике".' },
+  { emoji: '🚇', text: 'Питерский метрополитен: самый глубокий, как и мои размышления в 3 часа ночи.' },
+  { emoji: '🌂', text: 'Зонтик в Питере — это не аксессуар, это образ жизни.' },
+  { emoji: '📱', text: 'Мой телефон знает больше обо мне, чем я сам. И это пугает.' },
+  { emoji: '🎭', text: 'Мариинский театр: когда ты идёшь на балет, а засыпаешь на первом акте.' },
+  { emoji: '🐦', text: 'Белые ночи в Питере: когда в 2 часа ночи думаешь, что пора вставать на учёбу.' },
+  { emoji: '🥐', text: 'Утро студента: кофе, паника, повторить.' },
+  { emoji: '🎓', text: 'Диплом — это просто очень длинная курсовая, которую ты пишешь под музыку паники.' },
+  { emoji: '🌧️', text: 'Прогноз погоды в Питере: утром дождь, днём дождь, вечером —惊喜 — дождь.' }
+];
+
+// Детерминированная шутка на день (обновляется каждый день)
+function getDailyJokeIndex() {
+  const today = new Date();
+  const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  return dateSeed % JOKES.length;
+}
+
+function showDailyJoke() {
+  const idx = getDailyJokeIndex();
+  const j = JOKES[idx];
+  document.getElementById('joke-emoji').textContent = j.emoji;
+  document.getElementById('joke-text').textContent = j.text;
+  const today = new Date();
+  document.getElementById('joke-date').textContent = 
+    `✨ Шутка на ${today.getDate()} ${MONTHS_RU[today.getMonth()]}`;
+}
+
+function nextRandomJoke() {
+  const dailyIdx = getDailyJokeIndex();
+  let idx;
+  do { idx = Math.floor(Math.random() * JOKES.length); } while (idx === dailyIdx && JOKES.length > 1);
+  const j = JOKES[idx];
+  document.getElementById('joke-emoji').textContent = j.emoji;
+  document.getElementById('joke-text').textContent = j.text;
+  document.getElementById('joke-date').textContent = '🎲 Случайная шутка';
+}
+
+function shareJoke() {
+  const text = document.getElementById('joke-text').textContent;
+  if (navigator.share) navigator.share({ text });
+  else { navigator.clipboard.writeText(text).then(() => showToast('Скопировано 📋')); }
+}
+
+const AFFIRMATIONS = [
+  'Ты делаешь достаточно. Даже если кажется, что мало.',
+  'Каждый маленький шаг — это прогресс.',
+  'Ты имеешь право на отдых.',
+  'Ты сильнее, чем думаешь.',
+  'Этот семестр тоже закончится. И ты справишься.',
+  'Твои чувства важны.',
+  'Ты не обязан(а) быть продуктивным(ой) каждую минуту.',
+  'Сегодня ты уже сделал(а) что-то хорошее.',
+  'Ты заслуживаешь заботы. Начни с себя.',
+  'Питерская хандра — это временно. Весна придёт.',
+  'Ты не один(а). Даже когда кажется, что это не так.',
+  'Маленькие радости — это тоже жизнь.',
+  'Разреши себе быть неидеальным(ой).',
+  'Ты достоин(а) хорошего дня. Даже сегодня.'
+];
+function getDailyAffirmationIndex() {
+  const today = new Date();
+  const dateSeed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  return dateSeed % AFFIRMATIONS.length;
+}
+function showDailyAffirmation() {
+  const a = AFFIRMATIONS[getDailyAffirmationIndex()];
+  document.getElementById('affirmation').textContent = '«' + a + '»';
+}
+function nextAffirmation() {
+  const dailyIdx = getDailyAffirmationIndex();
+  let idx;
+  do { idx = Math.floor(Math.random() * AFFIRMATIONS.length); } while (idx === dailyIdx && AFFIRMATIONS.length > 1);
+  document.getElementById('affirmation').textContent = '«' + AFFIRMATIONS[idx] + '»';
+}
+
+// ===== ANALYTICS =====
+let charts = {};
+function renderAnalytics() {
+  const tasks = DB.get('tasks', []);
+  const moods = DB.get('moods', []);
+  const habits = DB.get('habits', []);
+  const reading = DB.get('reading', {totalMin: 0, history: {}});
+  const quotes = DB.get('quotes', []);
+  const notes = DB.get('notes', []);
+  const weights = DB.get('weights', []);
+  
+  document.getElementById('an-total-streak').textContent = calcTotalStreak();
+  document.getElementById('an-tasks-done').textContent = tasks.filter(t => t.done).length;
+  document.getElementById('an-reading-time').textContent = reading.totalMin || 0;
+  document.getElementById('an-quotes').textContent = quotes.length;
+  
+  const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 6);
+  const weekDates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart); d.setDate(d.getDate() + i);
+    weekDates.push(d.toISOString().split('T')[0]);
+  }
+  document.getElementById('week-tasks-done').textContent = tasks.filter(t => t.done && weekDates.includes(t.date)).length;
+  document.getElementById('week-habits-done').textContent = habits.reduce((sum, h) => sum + weekDates.filter(d => h.days?.[d]).length, 0);
+  document.getElementById('week-reading').textContent = weekDates.reduce((sum, d) => sum + ((reading.history || {})[d] || 0), 0);
+  document.getElementById('week-notes').textContent = notes.filter(n => weekDates.includes(n.date.split('T')[0])).length;
+  const weekMoods = moods.filter(m => weekDates.includes(m.date));
+  if (weekMoods.length > 0) {
+    const moodValues = { '😄': 5, '😊': 4, '🥰': 5, '😐': 3, '😴': 2, '😔': 2, '😢': 1, '😤': 1 };
+    const avg = weekMoods.reduce((s, m) => s + (moodValues[m.emoji] || 3), 0) / weekMoods.length;
+    const moodEmojis = ['😢','😔','😴','😐','😊','😄'];
+    document.getElementById('week-mood').textContent = moodEmojis[Math.round(avg) - 1] + ' ' + avg.toFixed(1);
+  } else {
+    document.getElementById('week-mood').textContent = '—';
+  }
+  
+  Object.values(charts).forEach(c => c.destroy());
+  charts = {};
+  
+  const last30 = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split('T')[0];
+    const activity = 
+      tasks.filter(t => t.date === ds).length +
+      habits.reduce((s, h) => s + (h.days?.[ds] ? 1 : 0), 0) +
+      ((reading.history || {})[ds] || 0) / 10 +
+      moods.filter(m => m.date === ds).length +
+      notes.filter(n => n.date.startsWith(ds)).length;
+    last30.push({ date: ds, value: Math.round(activity * 10) / 10 });
+  }
+  const ctx1 = document.getElementById('chart-activity').getContext('2d');
+  const grad1 = ctx1.createLinearGradient(0, 0, 0, 200);
+  grad1.addColorStop(0, 'rgba(127, 90, 240, 0.4)');
+  grad1.addColorStop(1, 'rgba(127, 90, 240, 0)');
+  charts.activity = new Chart(ctx1, {
+    type: 'line',
+    data: {
+      labels: last30.map(d => d.date.slice(5)),
+      datasets: [{ label: 'Активность', data: last30.map(d => d.value), borderColor: '#7F5AF0', backgroundColor: grad1, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 5, borderWidth: 2 }]
+    },
+    options: chartOptions()
+  });
+  
+  const cats = {};
+  tasks.forEach(t => { cats[t.category] = (cats[t.category] || 0) + 1; });
+  const catLabels = { uni: 'Универ', homework: 'ДЗ', project: 'Проекты', personal: 'Личное', manicure: 'Маникюр', clinic: 'Поликлиника', appointment: 'Встречи' };
+  const catColors = { uni: '#7F5AF0', homework: '#FF8906', project: '#2CB67D', personal: '#A7A9BE', manicure: '#E53170', clinic: '#3DA9FC', appointment: '#FF6B9D' };
+  charts.categories = new Chart(document.getElementById('chart-categories'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(cats).map(k => catLabels[k] || k),
+      datasets: [{ data: Object.values(cats), backgroundColor: Object.keys(cats).map(k => catColors[k] || '#A7A9BE'), borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#A7A9BE', font: { family: 'Manrope', size: 11 }, padding: 12 } } }, cutout: '65%' }
+  });
+  
+  const last30Mood = [];
+  const moodValues = { '😄': 5, '😊': 4, '🥰': 5, '😐': 3, '😴': 2, '😔': 2, '😢': 1, '😤': 1 };
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split('T')[0];
+    const m = moods.find(x => x.date === ds);
+    last30Mood.push(m ? moodValues[m.emoji] || 3 : null);
+  }
+  charts.mood = new Chart(document.getElementById('chart-mood'), {
+    type: 'line',
+    data: {
+      labels: last30Mood.map((_, i) => { const d = new Date(); d.setDate(d.getDate() - (29 - i)); return d.getDate(); }),
+      datasets: [{ label: 'Настроение', data: last30Mood, borderColor: '#E53170', backgroundColor: 'rgba(229, 49, 112, 0.1)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: '#E53170', borderWidth: 2, spanGaps: true }]
+    },
+    options: { ...chartOptions(), scales: {
+      y: { min: 0, max: 5.5, ticks: { color: '#6B6D82', stepSize: 1, callback: v => ['','😢','😔','😐','😊','😄'][v] || '' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      x: { ticks: { color: '#6B6D82', maxTicksLimit: 10 }, grid: { display: false } }
+    } }
+  });
+  
+  const readingData = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split('T')[0];
+    readingData.push((reading.history || {})[ds] || 0);
+  }
+  const ctx2 = document.getElementById('chart-reading').getContext('2d');
+  const grad2 = ctx2.createLinearGradient(0, 0, 0, 200);
+  grad2.addColorStop(0, 'rgba(255, 137, 6, 0.6)');
+  grad2.addColorStop(1, 'rgba(255, 137, 6, 0)');
+  charts.reading = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: readingData.map((_, i) => { const d = new Date(); d.setDate(d.getDate() - (29 - i)); return d.getDate(); }),
+      datasets: [{ label: 'Минут', data: readingData, backgroundColor: grad2, borderRadius: 4, borderSkipped: false }]
+    },
+    options: chartOptions()
+  });
+  
+  if (weights.length >= 2) {
+    charts.weight = new Chart(document.getElementById('chart-weight'), {
+      type: 'line',
+      data: {
+        labels: weights.map(w => w.date.slice(5)),
+        datasets: [{ label: 'Вес', data: weights.map(w => w.weight), borderColor: '#2CB67D', backgroundColor: 'rgba(44, 182, 125, 0.1)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#2CB67D', borderWidth: 2 }]
+      },
+      options: chartOptions()
+    });
+  }
+}
+
+function chartOptions() {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { backgroundColor: '#232132', titleColor: '#FFFFFE', bodyColor: '#A7A9BE', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, padding: 10, cornerRadius: 8 }
+    },
+    scales: {
+      y: { ticks: { color: '#6B6D82', font: { family: 'Manrope' } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+      x: { ticks: { color: '#6B6D82', font: { family: 'Manrope' }, maxTicksLimit: 10 }, grid: { display: false } }
+    }
+  };
+}
+
+function calcTotalStreak() {
+  const tasks = DB.get('tasks', []);
+  const habits = DB.get('habits', []);
+  const moods = DB.get('moods', []);
+  const notes = DB.get('notes', []);
+  const reading = DB.get('reading', { history: {} });
+  
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split('T')[0];
+    const hasActivity = 
+      tasks.some(t => t.date === ds) ||
+      habits.some(h => h.days?.[ds]) ||
+      moods.some(m => m.date === ds) ||
+      notes.some(n => n.date.startsWith(ds)) ||
+      ((reading.history || {})[ds] || 0) > 0;
+    if (hasActivity) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function exportAnalytics() {
+  const data = {
+    tasks: DB.get('tasks', []), moods: DB.get('moods', []), habits: DB.get('habits', []),
+    reading: DB.get('reading', {}), quotes: DB.get('quotes', []), notes: DB.get('notes', []),
+    weights: DB.get('weights', []), books: DB.get('books', []),
+    exported: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cozy-day-analytics-' + todayStr() + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Аналитика экспортирована 📤');
+}
+
+// ===== INIT =====
+function init() {
+  updateHome();
+  renderTasks();
+  renderSchedule();
+  renderAppts();
+  updateReaderStats();
+  renderQuotes();
+  renderMoodHistory();
+  renderMoodDiary();
+  renderHabits();
+  renderWeight();
+  renderNotes();
+  renderSavedScraps();
+  updateWeather();
+  refreshNews();
+  showDailyJoke();
+  showDailyAffirmation();
+  renderCalendar();
+  renderBooks();
+  
+  setInterval(updateWeather, 600000);
+  // Обновление времени новостей
+  setInterval(() => {
+    if (newsUpdateTime) {
+      const mins = Math.floor((new Date() - newsUpdateTime) / 60000);
+      document.getElementById('news-updated').textContent = mins < 1 ? 'только что' : `${mins} мин назад`;
+    }
+  }, 60000);
+}
+
+init();
+</script>
+</body>
+</html>
